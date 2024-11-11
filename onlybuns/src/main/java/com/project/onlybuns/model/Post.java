@@ -90,11 +90,11 @@ public class Post {
         this.likes = likes;
     }*/
 
-    public Integer getPostsCount() {
+    public Integer getLikesCount() {
         return likesCount;
     }
 
-    public void setPostsCount(Integer postsCount) {
+    public void setLikesCount(Integer postsCount) {
         this.likesCount = postsCount;
     }
 

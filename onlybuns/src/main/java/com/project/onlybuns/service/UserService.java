@@ -9,18 +9,11 @@ import com.project.onlybuns.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-import java.awt.print.Pageable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -91,13 +84,13 @@ public class UserService {
         return userRepository.findByUserType(UserType.ADMINISTRATOR);
     }
 
-
-
-   /* public List<User> findAllRegisteredUsersById() {
-        return userRepository.findByUserId(UserType.REGISTERED_USER);
+    public Optional<User> findRegisteredUsersByUsername(String username) {
+        return userRepository.findRegisteredUserByUsername(username, UserType.REGISTERED_USER);
     }
 
-    // Metoda za dobavljanje svih administratora
+
+
+   /* // Metoda za dobavljanje svih administratora
     public List<User> findAllAdministratorsById() {
         return userRepository.findByUserId(UserType.ADMINISTRATOR);
     }*/
