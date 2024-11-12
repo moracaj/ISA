@@ -9,25 +9,18 @@ import com.project.onlybuns.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-import java.awt.print.Pageable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-
+    @Autowired
     public PasswordEncoder passwordEncoder;  //ne znam sta ce mi ovo
 
     @Autowired
@@ -83,21 +76,21 @@ public class UserService {
     }
 
     public List<User> findAllRegisteredUsers() {
-        return userRepository.findByUserType(UserType.REGISTERED_USER);
+        return userRepository.findByUserType(UserType.ROLE_REGISTERED);
     }
 
     // Metoda za dobavljanje svih administratora
     public List<User> findAllAdministrators() {
-        return userRepository.findByUserType(UserType.ADMINISTRATOR);
+        return userRepository.findByUserType(UserType.ROLE_ADMIN);
+    }
+
+    public Optional<User> findRegisteredUsersByUsername(String username) {
+        return userRepository.findRegisteredUserByUsername(username, UserType.ROLE_REGISTERED);
     }
 
 
 
-   /* public List<User> findAllRegisteredUsersById() {
-        return userRepository.findByUserId(UserType.REGISTERED_USER);
-    }
-
-    // Metoda za dobavljanje svih administratora
+   /* // Metoda za dobavljanje svih administratora
     public List<User> findAllAdministratorsById() {
         return userRepository.findByUserId(UserType.ADMINISTRATOR);
     }*/
@@ -112,14 +105,14 @@ public class UserService {
 
     // Funkcija za čuvanje registrovanog korisnika
     public User saveRegisteredUser(User user) {
-        user.setUserType(UserType.REGISTERED_USER);
+        user.setUserType(UserType.ROLE_REGISTERED);
         user.setPassword(passwordEncoder.encode(user.getPassword()));  // Enkoding lozinke
         return userRepository.save(user);
     }
 
     // Funkcija za čuvanje administratora
     public User saveAdministrator(User user) {
-        user.setUserType(UserType.ADMINISTRATOR);
+        user.setUserType(UserType.ROLE_ADMIN);
         user.setPassword(passwordEncoder.encode(user.getPassword()));  // Enkoding lozinke
         return userRepository.save(user);
     }

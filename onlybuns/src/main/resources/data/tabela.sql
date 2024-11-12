@@ -3,9 +3,9 @@
 -- Insert users with dtype, address, and posts_count columns
 INSERT INTO users (email, password, username, user_type, first_name, last_name, address, posts_count)
 VALUES
-    ('testuser2@example.com', '12345', 'tester2', 'ADMINISTRATOR', 'Test', 'User2', 'Administrator', '4'),
-    ('testuser4@example.com', '12345', 'tester4', 'REGISTERED_USER', 'Test', 'User4', 'RegisteredUser',  4),
-    ('testuser7@example.com', '12345', 'tester7', 'REGISTERED_USER', 'Test', 'User7', 'RegisteredUser', 4);
+    ('testuser2@example.com', 'password123', 'tester2', 'ROLE_REGISTERED', 'Test', 'User2', 'Administrator', '4'),
+    ('testuser4@example.com', 'password123', 'tester4', 'ROLE_ADMIN', 'Test', 'User4', 'RegisteredUser',  4),
+    ('testuser7@example.com', 'password123', 'tester7', 'ROLE_REGISTERED', 'Test', 'User7', 'RegisteredUser', 4);
 
 
 

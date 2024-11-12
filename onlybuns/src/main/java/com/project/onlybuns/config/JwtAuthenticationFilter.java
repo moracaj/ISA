@@ -31,7 +31,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Direktno definišemo tajni ključ
-    private static final String JWT_SECRET = "kljuc";
+    private static final String JWT_SECRET = "kljucmoradabudeveciiiiiiiiijeljasnjooooooooooooooo";
 
     private SecretKey secretKey;
 
