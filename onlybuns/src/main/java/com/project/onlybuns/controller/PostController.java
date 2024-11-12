@@ -48,33 +48,33 @@ public class PostController {
         return null;
     }
 
-    @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('REGISTERED')")  // Ova anotacija osigurava da samo REGISTERED korisnici mogu obrisati objavu
-    public ResponseEntity<String> deletePost(@PathVariable Long id) {
-        // Dobijanje korisničkog imena iz tokena
-        String username = getUsernameFromToken();
-
-        if (username == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated"); // 401 if user is not authenticated
-        }
-
-        // Pronađi post po ID-u
-        Optional<Post> optionalPost = postService.findById(id);
-
-        if (optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-
-            // Proveri da li je korisnik autor objave
-            if (post.getUser().getUsername().equals(username)) {
-                postService.delete(id); // Obriši post
-                return ResponseEntity.noContent().build(); // 204 if post was deleted successfully
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot delete it"); // 403 if user is not the author
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found"); // 404 if post doesn't exist
-        }
-    }
+//    @DeleteMapping("/delete/{id}")
+//    @PreAuthorize("hasRole('REGISTERED')")  // Ova anotacija osigurava da samo REGISTERED korisnici mogu obrisati objavu
+//    public ResponseEntity<String> deletePost(@PathVariable Long id) {
+//        // Dobijanje korisničkog imena iz tokena
+//        String username = getUsernameFromToken();
+//
+//        if (username == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated"); // 401 if user is not authenticated
+//        }
+//
+//        // Pronađi post po ID-u
+//        Optional<Post> optionalPost = postService.findById(id);
+//
+//        if (optionalPost.isPresent()) {
+//            Post post = optionalPost.get();
+//
+//            // Proveri da li je korisnik autor objave
+//            if (post.getUser().getUsername().equals(username)) {
+//                postService.delete(id); // Obriši post
+//                return ResponseEntity.noContent().build(); // 204 if post was deleted successfully
+//            } else {
+//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot delete it"); // 403 if user is not the author
+//            }
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found"); // 404 if post doesn't exist
+//        }
+//    }
 
 
     @GetMapping("/my-posts")
