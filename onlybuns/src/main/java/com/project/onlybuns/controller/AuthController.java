@@ -66,7 +66,7 @@ public class AuthController {
 
 
 
-   /* @PostMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Validated @RequestBody User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMessages = new HashMap<>();
@@ -111,10 +111,10 @@ public class AuthController {
         //System.out.println("Encoded password during registration: " + encodedPassword);
 
         return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully!"));
-    }*/
+    }
 
 
-    @PostMapping("/register")
+   /* @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Validated @RequestBody UserDto userDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMessages = new HashMap<>();
@@ -155,7 +155,7 @@ public class AuthController {
       //  emailService.sendActivationEmail(userDTO.getEmail(), token);
 
         return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully!"));
-    }
+    }*/
 
 
 
