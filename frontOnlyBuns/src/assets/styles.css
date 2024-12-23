@@ -1,0 +1,10 @@
+/* src/assets/styles.css */
+
+.welcome-message {
+  font-size: 2em; /* Veličina fonta */
+  color: #4CAF50; /* Zeleno */
+  margin: 20px 0; /* Razmak oko poruke */
+  font-weight: bold; /* Podebljan font */
+}
+
+  

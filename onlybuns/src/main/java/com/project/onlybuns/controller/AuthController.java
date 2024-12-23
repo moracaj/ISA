@@ -66,7 +66,7 @@ public class AuthController {
 
 
 
-   /* @PostMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Validated @RequestBody User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMessages = new HashMap<>();
@@ -111,126 +111,13 @@ public class AuthController {
         //System.out.println("Encoded password during registration: " + encodedPassword);
 
         return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully!"));
-    }*/
-
-
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDto userDTO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errorMessages = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                    errorMessages.put(error.getField(), error.getDefaultMessage())
-            );
-            return ResponseEntity.badRequest().body(errorMessages);
-        }
-
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("username", "Error: Username is already taken!"));
-        }
-
-        if (userService.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("email", "Error: Email is already in use!"));
-        }
-
-        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
-
-        User registeredUser = new User();
-        registeredUser.setUsername(userDTO.getUsername());
-        registeredUser.setPassword(encodedPassword);
-        registeredUser.setEmail(userDTO.getEmail());
-        registeredUser.setFirstName(userDTO.getFirstName());
-        registeredUser.setLastName(userDTO.getLastName());
-        registeredUser.setAddress(userDTO.getAddress());
-
-        // Korisnik je inicijalno inaktiviran
-       // registeredUser.setActive(false);
-        userService.saveRegisteredUser(registeredUser);
-
-        // Generiši token za aktivaciju
-        String token = jwtAuthenticationFilter.generateToken(registeredUser);
-
-        System.out.println("Generisani token: " + token);
-
-
-      //  emailService.sendActivationEmail(userDTO.getEmail(), token);
-
-        return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully!"));
     }
 
 
 
 
-  /*  @PostMapping("/login") // POST "/auth/login"
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader, HttpServletRequest request) {
-        try {
-            // Ako već postoji Authorization header (token), vrati poruku da je korisnik već ulogovan
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Collections.singletonMap("message", "Error: User is already logged in!"));
-            }
-
-            String email = userInput.get("email");
-            String password = userInput.get("password");
-
-            if (email == null || email.isEmpty()) {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email must be provided!"));
-            }
-
-            if (password == null || password.isEmpty()) {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Password must be provided!"));
-            }
-
-            // Get client IP address
-            String ipAddress = request.getRemoteAddr();
-
-            // Check if this IP has exceeded the login attempt limit
-            if (loginAttemptService.isBlocked(ipAddress)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Collections.singletonMap("message", "Error: Too many login attempts. Please try again later."));
-            }
-
-            Optional<User> optionalUser = userService.findByEmail(email);
-
-            if (optionalUser.isPresent()) {
-                User existingUser = optionalUser.get();
 
 
-
-
-                if (passwordEncoder.matches(password, existingUser.getPassword())) {
-                    //String userType = existingUser instanceof User ? "ADMIN" : "REGISTERED";
-                    String userType = existingUser.getUserType().toString();
-                    String token = jwtAuthenticationFilter.generateToken(existingUser);
-
-                    // Reset login attempts upon successful login
-                    loginAttemptService.resetAttempts(ipAddress);
-
-                    // Prepare response
-                    Map<String, String> response = new HashMap<>();
-                    response.put("message", "User logged in successfully!");
-                    response.put("userType", userType);
-                    response.put("token", token);
-
-                    return ResponseEntity.ok(response);
-                } else {
-                    // Increment failed attempts
-                    loginAttemptService.incrementAttempts(ipAddress);
-
-                    return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
-                }
-            } else {
-                // Increment failed attempts
-                loginAttemptService.incrementAttempts(ipAddress);
-
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: User not found!"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
-        }
-    }
-*/
     ///////////////////////////////////
  @PostMapping("/login")
   public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader, HttpServletRequest request) {
