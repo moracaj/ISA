@@ -230,39 +230,6 @@ public ResponseEntity<Post> createPost(
 
 
 
-  /*  @PutMapping("/update/{id}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User loggedUser = userService.findByUsername1(username).orElse(null);
-
-        if (loggedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
-
-        Optional<Post> optionalPost = postService.findById(id);
-
-        if (optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-
-            if (!post.getUser().equals(loggedUser)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot update it");
-            }
-
-            if (updatedPost.getImageUrl() != null) {
-                post.setImageUrl(updatedPost.getImageUrl());
-            }
-            if (updatedPost.getDescription() != null) {
-                post.setDescription(updatedPost.getDescription());
-            }
-
-            postService.update(post);
-
-            return ResponseEntity.ok("Post updated successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
-        }
-    }*/
 
 
 
@@ -310,33 +277,7 @@ public ResponseEntity<Post> createPost(
     }
 
 
-   /* @PutMapping("/{id}/like")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id) {
-        // Pronađi post prema id
-        Optional<Post> postOptional = postService.findById(id);
 
-        if (postOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
-        }
-
-        Post post = postOptional.get();
-
-        // Dohvati korisničko ime iz SecurityContext
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // Pronađi korisnika na osnovu korisničkog imena
-        Optional<User> loggedInUserOptional = userService.findByUsername1(username);
-
-        if (loggedInUserOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
-        }
-
-        User loggedInUser = loggedInUserOptional.get();
-
-
-        }
-    }*/
 
 
     /*@PostMapping("/{id}/comments")

@@ -204,14 +204,7 @@ export default {
         
 
 
-        // const postDto = {
-        // description: this.newPost.description,
-        // imageUrl: this.newPost.imageUrl, // Dodaj URL ako koristiš postojeći
-        // latitude: this.newPost.latitude,
-        // longitude: this.newPost.longitude,
-        // location: this.newPost.location
-    //};
-
+     
 
 
         try {
