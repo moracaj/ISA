@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 
-public class LogInService {
+public class  LogInService {
 
     // Maksimalan broj pokušaja
     private final int MAX_ATTEMPTS = 5;

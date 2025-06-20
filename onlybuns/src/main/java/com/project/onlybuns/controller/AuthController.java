@@ -101,7 +101,7 @@ public class AuthController {
         userService.saveRegisteredUser(registeredUser);
 
         // Generiši token za aktivaciju
-     //   String token = jwtAuthenticationFilter.generateToken(registeredUser);
+        String token = jwtAuthenticationFilter.generateToken(registeredUser);
 
        // System.out.println("Generisani token: " + token);
 
@@ -157,7 +157,7 @@ public class AuthController {
 
 
               // Proveri da li je lozinka ispravno upoređena sa onom u bazi
-            //  if (passwordEncoder.matches(password, existingUser.getPassword())) {
+             // if (passwordEncoder.matches(password, existingUser.getPassword())) {
                   if(1==1) {
 
                   String userType = existingUser.getUserType().toString();
@@ -210,7 +210,7 @@ public class AuthController {
         return ResponseEntity.ok("Old passwords updated successfully!");
     }
 
-    public void updateOldPasswords() {
+    /*public void updateOldPasswords() {
         List<User> users = userService.findAll();
 
         for (User user : users) {
@@ -222,7 +222,22 @@ public class AuthController {
                 userService.saveRegisteredUser(user);
             }
         }
+    }*/
+
+    public void updateOldPasswords() {
+        List<User> users = userService.findAll(); // Uzimanje svih korisnika
+        for (User user : users) {
+            // Proveri da li je trenutna lozinka "pa"
+            if (user.getPassword().equals("password123")) {
+                // Dodeli novu lozinku
+                String newPassword = "sifra123"; // Postavi novu lozinku
+                String encodedPassword = passwordEncoder.encode(newPassword);
+                user.setPassword(encodedPassword);
+                userService.saveRegisteredUser(user); // Sačuvaj ažuriranog korisnika
+            }
+        }
     }
+
 
 
 
@@ -255,21 +270,8 @@ public class AuthController {
             registeredUserService.saveRegisteredUser(user); // Sačuvaj korisnika sa ažuriranim postsCount
         }
         return ResponseEntity.ok("Old passwords updated successfully!");
-    }
-
-    public void updateOldPasswords() {
-        List<User> users = userService.findAll(); // Uzimanje svih korisnika
-        for (User user : users) {
-            // Proveri da li je trenutna lozinka "pa"
-            if (user.getPassword().equals("password123")) {
-                // Dodeli novu lozinku
-                String newPassword = "sifra123"; // Postavi novu lozinku
-                String encodedPassword = passwordEncoder.encode(newPassword);
-                user.setPassword(encodedPassword);
-                userService.saveRegisteredUser(user); // Sačuvaj ažuriranog korisnika
-            }
-        }
     }*/
+
 
 
 

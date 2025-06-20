@@ -7,7 +7,13 @@ import RegisteredPage from '@/components/RegisteredPage.vue'; // Import your Adm
 import UserProfile from '@/components/UserProfile.vue';
 
 const routes = [
+  // {
+  //   path: '/',
+  //   name:'Home',
+  //   component:LoginPage
+  // },
   {
+
     path: '/login',
     name: 'Login',
     component: LoginPage,
