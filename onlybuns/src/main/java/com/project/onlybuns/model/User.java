@@ -2,20 +2,23 @@ package com.project.onlybuns.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-
-import java.util.List;
-//import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
-public class User {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "user_type")
+public abstract class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Uklonjen userType atribut
     @NotBlank(message = "Username cannot be blank")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     private String username;
@@ -24,52 +27,135 @@ public class User {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-   // @Email(message = "Email should be valid")
+
+    @Email(message = "Email should be valid")
     @NotBlank(message = "Email cannot be blank")
     private String email;
 
-
-    //@Column(name = "first_name")
     @NotBlank(message = "First name cannot be blank")
     private String firstName;
 
-    //@Column(name = "last_name")
     @NotBlank(message = "Last name cannot be blank")
     private String lastName;
 
     private String address;
+    private Float latitude;
+    private Float longitude;
 
-    //private boolean isActive = false; // Podrazumevano nije aktiviran
+    private boolean isActive; // Da li je nalog aktiviran
 
     @Column(name = "posts_count")
-    private Integer postsCount = 0; // Broj objava
+    private Integer postsCount; // Broj objava
 
-   // @Column(name = "followers_count")
-   // private Integer followersCount = 0; // Broj pratilaca  //////////////ovo mislim da mi ne treba
-
-   // @Column(name = "likes_count")
-   // private Integer likesCount = 0; // Broj lajkova  //////////////ni ovo
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "user_type", nullable = false)
-    private UserType userType;
-
-    // Konstruktor bez parametara
-    public User() {
+    public Float getLatitude() {
+        return latitude;
     }
 
-    // Konstruktor sa parametrima
-    public User(String username, String password, String email, String firstName, String lastName, String address, UserType userType) {
+    public void setLatitude(Float latitude) {
+        this.latitude = latitude;
+    }
+
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Float longitude) {
+        this.longitude = longitude;
+    }
+
+    @Column(name = "followers_count")
+    private Integer followersCount;
+
+    @Column(name = "following_count")
+    private Integer followingCount;
+    //private int followersCount; // Broj pratilaca
+
+    @Column(name = "likes_count")
+    private Integer likesCount;
+
+    @Column(name = "registration_date")
+    private LocalDateTime registrationDate; // Datum kada je pokušao da se registruje
+
+    @Column(name = "last_active_date")
+    private LocalDateTime lastActiveDate;
+
+    public LocalDateTime getLastActiveDate() {
+        return this.lastActiveDate;
+    }
+
+    public void setLastActiveDate(LocalDateTime lastActiveDate) {
+        this.lastActiveDate = lastActiveDate;
+    }
+
+    public void updateLastActiveDate() {
+        this.lastActiveDate = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    // Getters and Setters
+
+    public Integer getPostsCount() {
+        return postsCount != null ? postsCount : 0; // Vraća 0 ako je null
+    }
+
+    public void setPostsCount(Integer postsCount) {
+        this.postsCount = postsCount;
+    }
+
+
+    public Integer getFollowersCount() {
+        return followersCount!=null ? followersCount:0;
+    }
+
+    public Integer getFollowingCount() {
+        return followingCount!=null ? followingCount:0;
+    }
+
+    public void setFollowersCount(Integer followersCount) {
+        this.followersCount = followersCount;
+    }
+
+    public void setFollowingCount(Integer followersCount) {
+
+        this.followingCount = followersCount;
+    }
+
+
+
+    // No-argument constructor
+    public User() {
+        this.isActive = false; // Podrazumevano nije aktiviran
+        this.followersCount = 0;
+        this.followingCount =0;
+        this.postsCount =0;
+        this.likesCount =0;
+        this.registrationDate = LocalDateTime.now();
+    }
+
+
+    // Constructor with parameters
+    public User(String username, String password, String email, String firstName, String lastName, String address) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
-        this.userType = userType;
+        this.isActive = false; // Podrazumevano nije aktiviran
     }
 
-    // Getteri i setteri
+
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -93,6 +179,14 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+        this.isActive = false; // Podrazumevano nije aktiviran
+    }
+
+
 
     public String getEmail() {
         return email;
@@ -126,29 +220,15 @@ public class User {
         this.address = address;
     }
 
-    public Integer getPostsCount() {
-        return postsCount;
-    }
-
-    public void setPostsCount(Integer postsCount) {
-        this.postsCount = postsCount;
-    }
-
-   /* public Integer getFollowersCount() {
-        return followersCount;
-    }
-
-    public void setFollowersCount(Integer followersCount) {
-        this.followersCount = followersCount;
-    }
-
     public Integer getLikesCount() {
-        return likesCount;
+        return likesCount != null ? likesCount : 0; // Vraća 0 ako je null
     }
 
     public void setLikesCount(Integer likesCount) {
         this.likesCount = likesCount;
     }
+
+
 
     public boolean isActive() {
         return isActive;
@@ -156,26 +236,11 @@ public class User {
 
     public void setActive(boolean active) {
         isActive = active;
-    }*/
-
-    public UserType getUserType() {
-        return userType;
     }
 
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public String getUserType() {
+        return this.getClass().getSimpleName(); // Vraća naziv klase (tip korisnika)
     }
 
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    //@JsonManagedReference(value = "post-user"
-    private List<Post> posts;
-
-    // Getteri i setteri
-    // public int getFollowerCount() { return followerCount; }
-    // public void setFollowerCount(int followerCount) { this.followerCount = followerCount; }
-
-    public List<Post> getPosts() { return posts; }
-    public void setPosts(List<Post> posts) { this.posts = posts; }
 
 }

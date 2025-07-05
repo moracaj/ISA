@@ -1,10 +1,5 @@
 package com.project.onlybuns.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -40,34 +35,29 @@ public class Post {
     @Column(nullable = true)
     private String description;
 
-    @Column(name = "likes_count")
-    private Integer likesCount = 0;
+    @Version
+    private Integer version;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference(value = "post-user")
-    private User user;
+    @JsonBackReference(value = "post-user")  // Sprečava cikličnu serijalizaciju
+    private RegisteredUser user;
 
-   // @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-   // private List<Like> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "post-comments")
+    @JsonManagedReference(value = "post-comments") // Za serijalizaciju Comments
     private List<Comment> comments = new ArrayList<>();
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdTime;
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdTime = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(); // Postavljanje trenutnog vremena prilikom kreiranja
     }
-
-    // Metode za brojanje lajkova i komentara
-   /* public int getLikesCount() {
-        return likesCount.size();
-    }*/
-
 
     @Column(nullable = true)
     private Double latitude;
@@ -94,6 +84,14 @@ public class Post {
         this.longitude = longitude;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
     public String getLocation() {
         return location;
     }
@@ -102,24 +100,16 @@ public class Post {
         this.location = location;
     }
 
-    @Lob
-    private byte[] image;
-
-    // Getteri i setteri za image
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
 
 
+    // Broj komentara
     public int getCommentsCount() {
         return comments.size();
     }
 
-    // Getteri i setteri
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+
     public Long getId() {
         return id;
     }
@@ -144,28 +134,21 @@ public class Post {
         this.description = description;
     }
 
-    public User getUser() {
+    public RegisteredUser getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(RegisteredUser user) {
         this.user = user;
     }
 
-   /* public List<Like> getLikes() {
-        return likes;
+
+    public boolean isDeleted() {
+        return isDeleted;
     }
 
-    public void setLikes(List<Like> likes) {
-        this.likes = likes;
-    }*/
-
-    public Integer getLikesCount() {
-        return likesCount;
-    }
-
-    public void setLikesCount(Integer postsCount) {
-        this.likesCount = postsCount;
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public List<Comment> getComments() {
@@ -177,10 +160,6 @@ public class Post {
     }
 
     public LocalDateTime getCreatedAt() {
-        return createdTime;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdTime = createdAt;
+        return createdAt;
     }
 }

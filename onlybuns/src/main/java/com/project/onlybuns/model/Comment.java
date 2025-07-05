@@ -1,7 +1,10 @@
 package com.project.onlybuns.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
@@ -14,32 +17,35 @@ public class Comment {
     private Long id;
 
     @Column(nullable = false)
+    @NotBlank(message = "Content cannot be blank")
+    @Size(max = 500, message = "Content cannot exceed 500 characters")
     private String content;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference(value = "user-comments")  // Sprečava serijalizaciju povezane RegisteredUser
-    private User user; // Povezivanje sa RegisteredUser
+    private RegisteredUser user; // Povezivanje sa RegisteredUser
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference(value = "post-comments")// Sprečava serijalizaciju povezane Post
-    private Post post; // Povezivanje sa Post
+    private Post post;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdTime;  // Datum i vreme kada je komentar napravljen
+    private LocalDateTime createdAt;
+
 
     public LocalDateTime getCreatedAt() {
-        return createdTime;
+        return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdTime = createdAt;
+        this.createdAt = createdAt;
     }
 
     @PrePersist
     protected void onCreate() {
-        this.createdTime = LocalDateTime.now();  // Postavljanje trenutnog vremena pre nego što komentar bude sačuvan
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -58,11 +64,11 @@ public class Comment {
         this.content = content;
     }
 
-    public User getUser() {
+    public RegisteredUser getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(RegisteredUser user) {
         this.user = user;
     }
 
