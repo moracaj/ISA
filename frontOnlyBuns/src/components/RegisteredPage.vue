@@ -260,27 +260,7 @@ export default {
             }
         },
 
-        async deletePost(postId) {
-            const token = sessionStorage.getItem('token');
-            try {
-                const response = await fetch(`http://localhost:8080/posts/delete/${postId}`, {
-                    method: "DELETE",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                });
-
-                if (response.ok) {
-                    console.log(`Post with ID ${postId} has been deleted.`);
-                    this.posts = this.posts.filter(post => post.id !== postId);
-                } else {
-                    console.error("Error deleting post.");
-                }
-            } catch (error) {
-                console.error("An error occurred while deleting the post:", error.message);
-            }
-        },
+        
 
        
        
@@ -392,29 +372,10 @@ checkAuthAndNavigateToTrends(){
 };
 </script>
 
+
 <style scoped>
 
-.post-description {
-  background-color: #f9f9f9; /* Svetla pozadina za post */
-  border: 2px solid #685cd5; /* Blaga granica oko opisa */
-  border-radius: 8px; /* Zaobljeni uglovi */
-  padding: 15px; /* Unutrašnji razmak */
-  margin-top: 20px; /* Razmak od drugih sekcija */
-}
 
-.post-description h3 {
-  font-size: 22px; /* Veća veličina za naslov */
-  color: #333; /* Tamnija boja za bolji kontrast */
-  margin-bottom: 10px; /* Razmak između naslova i opisa */
-  font-weight: bold; /* Podebljan font za naslov */
-}
-
-.post-description p {
-  font-size: 16px; /* Veličina fonta za tekst opisa */
-  color: #555; /* Siva boja za tekst */
-  line-height: 1.6; /* Veći razmak između redova */
-  word-wrap: break-word; /* Prelomi dugi tekst na sledeći red */
-}
 
 .home-navigation ul li a:hover {
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Dodaje senku */
@@ -450,130 +411,110 @@ checkAuthAndNavigateToTrends(){
     margin-right: 8px;
 }
 
-/* Style for the home button */
-.home-button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #28a745; /* Green color */
-    color: white;
-    font-size: 18px;
-    text-decoration: none;
-    border-radius: 5px;
-    margin-top: 20px;
-}
 
-.home-button:hover {
-    background-color: #218838; /* Darker green on hover */
-}
 
-.home-content {
-    margin-top: 20px;
-}
+
+
+
 .posts-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 100px; /* Razmak između postova u grid-u */
-    justify-content: center;
-    align-items: center; 
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 40px;
+  justify-content: center;
+  padding: 20px;
 }
 
 .post {
-    width: 350px;
-    height: 800px;
-    background-color: #f9f9f9;
-    border: 2px solid #195b28;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    margin-bottom: 20px; /* Razmak između postova (ako je potreban) */
+  background-color: #eaf4fc;
+  border: 2px solid #4a90e2;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
+.post:hover {
+  transform: translateY(-5px);
+}
 
 .post-image {
-    width: 100%; /* Slika će zauzeti celu širinu */
-    height: 250px; /* Fiksna visina slike */
-    object-fit: cover; /* Izrezivanje slike da stane u okvir */
-    border-radius: 5px;
-    margin-bottom: 10px;
+  width: 80%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.post-description {
+  background-color: #ffffff;
+  border-left: 4px solid #3a7bd5;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.post-description h3 {
+  font-size: 22px;
+  color: #1a4b7b;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.post-description p {
+  font-size: 16px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.comments-list {
+  margin-top: 15px;
+  padding-left: 15px;
+}
+
+.comment-item {
+  background-color: #f0f7ff;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.likes-container {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #1a4b7b;
 }
 
 .add-comment {
-  margin-top: 10px;
   display: flex;
-  align-items: center;
   gap: 10px;
+  margin-top: 12px;
 }
 
 .add-comment textarea {
-  width: 80%;
-  height: 40px;
-  margin-bottom: 5px;
-  border: 1px solid #ddd;
+  flex: 1;
+  border-radius: 6px;
+  border: 1px solid #bcdffb;
+  padding: 8px;
 }
 
 .add-comment button {
-  padding: 5px 10px;
-  background-color: #0c1e5e;
+  background-color: #3a7bd5;
   color: white;
+  padding: 8px 14px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
 .add-comment button:hover {
-  background-color: #4b3ca7;
-}
-
-
-.comments-list {
-  flex-grow: 1;
-  list-style-type: none;
-  padding: 0;
-  margin: 10px 0 0 0; /* Razmak između slike i komentara */
-  overflow-y: auto;
-  max-height: 190px;
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
-  margin-left: 20px;
-}
-
-
-.comment-item {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  margin-bottom: 10px; /* Razmak između komentara */
-  padding: 5px;
-  font-size: 14px;
-  word-wrap: break-word; /* Prelamanje dugih reči */
-}
-
-
-.post-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.edit-button, .delete-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.edit-button {
-    background-color: #0c1e5e;
-    color: white;
-}
-
-.delete-button {
-    background-color: #dc3545;
-    color: white;
+  background-color: #26547c;
 }
 
 .modal {
@@ -596,8 +537,7 @@ checkAuthAndNavigateToTrends(){
   width: 300px;
   text-align: center;
 }
-
-.modal-actions {
+modal-actions {
   display: flex;
   justify-content: space-between;
   margin-top: 15px;
@@ -610,7 +550,7 @@ checkAuthAndNavigateToTrends(){
 }
 
 .confirm-button {
-  background-color: #28a745;
+  background-color: #524db5;
   color: white;
 }
 
@@ -623,7 +563,7 @@ checkAuthAndNavigateToTrends(){
   margin-left: 20px;
   display: inline-block;
   padding: 10px 20px;
-  background-color: #28a745;
+  background-color: #695dd4;
   color: white;
   font-size: 18px;
   text-decoration: none;
@@ -678,7 +618,7 @@ checkAuthAndNavigateToTrends(){
 }
 
 .add-post-modal .confirm-button {
-  background-color: #28a745;
+  background-color: #5157c0;
   color: white;
 }
 

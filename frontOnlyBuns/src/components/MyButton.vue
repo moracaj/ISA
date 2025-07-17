@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="button-container">
     <button @click="goToLogin" class="my-button login">Log in</button>
     <button @click="goToRegister" class="my-button register">Sign in</button>
@@ -47,23 +47,23 @@ export default {
 
 /* Styles for the first button (Log in) */
 .my-button.login {
-  background-color: #0c623b; /* Dark red background */
+  background-color: #0d47a1; /* Dark red background */
   color: white; /* White text */
 }
 
 .my-button.login:hover {
-  background-color: #0c623b; /* Slightly lighter on hover */
+  background-color: #1565c0; /* Slightly lighter on hover */
 }
 
 /* Styles for the second button (Sign in) */
 .my-button.register {
   background-color: white; /* White background */
-  color: #0c623b; /* Dark red text */
-  border: 2px solid #0c623b; /* Dark red border */
+  color: #0d47a1; /* Dark red text */
+  border: 2px solid #0d47a1; /* Dark red border */
 }
 
 .my-button.register:hover {
-  background-color: #f2f2f2; /* Light gray background on hover */
+  background-color:  #e3f2fd; /* Light gray background on hover */
 }
 
 .rabbit-gif {
@@ -79,4 +79,4 @@ export default {
 }
 
   </style>
-  
+   -->

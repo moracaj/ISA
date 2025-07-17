@@ -1,8 +1,8 @@
 <template>
     <div class="home-button-container">
       <button @click="goToHome" class="home-button">
-        <!-- Font Awesome House Icon -->
-        <i class="fas fa-home"></i>
+       
+        Back
       </button>
     </div>
   </template>
@@ -35,15 +35,19 @@ export default {
 }
 
 .home-button {
-  background-color: #f5f5f5;  /* Button background color */
-  padding: 10px 20px;         /* Button padding */
-  border: none;               /* Remove border */
-  border-radius: 5px;         /* Rounded corners */
-  cursor: pointer;            /* Change cursor on hover */
-  font-size: 16px;             /* Text size */
+ background-color: #007BFF;   /* Bootstrap plava */
+  color: white;                /* Tekst bele boje */
+  padding: 14px 28px;          /* Veće dimenzije */
+  border: none;
+  border-radius: 8px;          /* Malo zaobljenije */
+  cursor: pointer;
+  font-size: 18px;             /* Veći font */
+  font-weight: bold;           /* Bold tekst */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Lagani senka efekat */
+  transition: background-color 0.3s ease;           /* Text size */
 }
 
 .home-button:hover {
-  background-color: #e0e0e0;  /* Darken the button on hover */
+  background-color: #0056b3;  /* Darken the button on hover */
 }
 </style>

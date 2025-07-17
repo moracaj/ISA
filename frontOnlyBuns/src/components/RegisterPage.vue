@@ -109,9 +109,9 @@ export default {
     clearErrors() {
       this.errors = {};
     },
-    components:{
-      HomeButton
-    },
+    // components:{
+    //   HomeButton
+    // },
     async checkUsernameAvailability() {
       this.errors.username = ''; // Clear previous error
       try {
@@ -218,7 +218,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<!-- <style scoped>
 .form {
   margin-top: 30px;
   margin-left: auto;
@@ -299,5 +299,88 @@ input {
   margin-top: 5px;
   height: 15px; /* Fixed height to prevent container expansion */
   overflow: hidden; /* Prevents text overflow */
+}
+</style> -->
+<style scoped>
+.form {
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #e0f0ff; /* svetloplava pozadina */
+  border-radius: 15px;
+  padding: 30px;
+  width: 600px;
+  height: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  gap: 20px;
+}
+
+h2 {
+  font-size: 34px;
+  margin-bottom: 20px;
+  color: #004080; /* tamnoplava */
+}
+
+.input-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input {
+  font-size: 19px;
+  height: 50px;
+  padding: 10px;
+  border: 1px solid #0077cc; /* plava ivica */
+  border-radius: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.password-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.my-button2 {
+  width: 150px;
+  height: 40px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  align-self: center;
+}
+
+.my-button2:hover {
+  background-color: #3399ff;
+}
+
+.toggle-button2 {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: #000;
+  cursor: pointer;
+  text-decoration: underline;
+  align-self: center;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+  height: 15px;
+  overflow: hidden;
 }
 </style>
