@@ -2,8 +2,7 @@ package com.project.onlybuns.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.onlybuns.model.Comment;
-//import com.project.onlybuns.model.Like;
-import com.project.onlybuns.model.User;
+import com.project.onlybuns.model.RegisteredUser;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -33,6 +32,14 @@ public class PostDto {
         this.longitude = longitude;
         this.location = location;
         this.imageFile = imageFile;
+    }
+
+    public PostDto(String imageUrl, Double latitude, Double longitude, String description) {
+        this.imageUrl = imageUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.description = description;
+
     }
 
     public MultipartFile getImageFile() {
