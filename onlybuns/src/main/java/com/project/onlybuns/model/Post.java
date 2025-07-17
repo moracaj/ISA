@@ -48,8 +48,8 @@ public class Post {
     @JsonManagedReference(value = "post-comments") // Za serijalizaciju Comments
     private List<Comment> comments = new ArrayList<>();
 
-    @Column(nullable = false)
-    private boolean isDeleted = false;
+  //  @Column(nullable = false)
+   // private boolean isDeleted = false;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -143,13 +143,13 @@ public class Post {
     }
 
 
-    public boolean isDeleted() {
-        return isDeleted;
-    }
+  // public boolean isDeleted() {
+    //    return isDeleted;
+  //  }
 
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
+  //  public void setDeleted(boolean deleted) {
+    //    isDeleted = deleted;
+  //  }
 
     public List<Comment> getComments() {
         return comments;
