@@ -5,11 +5,13 @@
         <!-- Navigation Links for Authenticated User -->
         <div class="home-navigation">
             <ul>
-                <li><router-link to="/following-posts"><i class="fas fa-users"></i> Following Posts</router-link></li>
-                <li><router-link to="/trends"><i class="fas fa-chart-line"></i> Trends</router-link></li>
-                <li><router-link to="/nearby-posts"><i class="fas fa-map-marker-alt"></i> Nearby Posts</router-link></li>
-                <li><router-link to="/chat"><i class="fas fa-comments"></i> Chat</router-link></li>
-                <li><router-link to="/profile"><i class="fas fa-user"></i> Profile</router-link></li>
+              
+              <li><router-link to="/following-posts"><i class="fas fa-users"></i> Following Posts</router-link></li>
+              <li><a @click="checkAuthAndNavigateToTrends"><i class="fas fa-user"></i> Trends</a></li>
+              <li><a @click="navigateToNearbyPosts"><i class="fas fa-user"></i> Nearby Posts</a></li>
+             
+              <li><router-link to="/chat"><i class="fas fa-comments"></i> Chat</router-link></li>
+              <li><a @click="checkAuthAndNavigateToProfile"><i class="fas fa-user"></i> Profile</a></li>
             </ul>
 
             <!-- <button @click="goHome" class="home-button">Home</button> -->
@@ -17,10 +19,10 @@
         </div>
 
         <!-- Main Content Area -->
-        <!-- <main class="home-content">
+        <main class="home-content">
             <div class="posts-container">
                 <div v-for="post in posts" :key="post.id" class="post">
-                  <h3>Location:</h3>
+                  <!-- <h3>Location:</h3> -->
                   <p>{{ post.location }}</p>
 
                     <img :src="post.imageUrl" alt="Post Image" class="post-image" />
@@ -28,81 +30,34 @@
                         <h3>Description:</h3>
                         <p>{{ post.description }}</p>
                     </div>
-                    <h3>Likes:</h3>
-                    <p>{{ post.countLikes }}</p>
-                    <h3>Comments:</h3>
+                    <div class="likes-container">
+                      <h3>Likes:4</h3>
+                      <p>{{ post.countLikes }}</p>
+                    </div>
+
+                    
                     <ul class="comments-list">
+                      <h3>Comments:</h3>
                         <li v-for="comment in post.comments" :key="comment.id" class="comment-item">
                             <strong>{{ comment.username }}:</strong> {{ comment.content }}
                         </li>
                     </ul>
-                    <div class="post-actions">
-                        <button @click="openEditModal(post)" class="edit-button">Edit</button>
-                        <button @click="deletePost(post.id)" class="delete-button">Delete</button>
-                    </div>
+                   
+
+                  <div class="add-comment">
+                    <textarea v-model="newCommentContent[post.id]" placeholder="Add a comment..."></textarea>
+                    <button @click="addComment(post.id)">→</button>
+                  </div>
+                  <div v-if="errorMessages[post.id]" class="error-message">
+                    {{ errorMessages[post.id] }}
+                  </div>
+
                 </div>
             </div>
-        </main> -->
+        </main>
 
-
-  
-        <main class="home-content">
-  <div class="posts-container">
-    <div v-for="post in posts" :key="post.id" class="post">
-      <!-- Slika posta -->
-      <img :src="post.imageUrl" alt="Post Image" class="post-image" />
-
-      <!-- Opis posta -->
-      <div class="post-content">
-        <h3>Description:</h3>
-        <p class="post-description">{{ post.description }}</p>
-
-        <!-- Broj lajkova i komentara -->
-        <div class="post-stats">
-          <span class="likes">❤️ {{ post.countLikes }} Likes</span>
-          <span class="comments">💬 {{ post.comments.length }} Comments</span>
-        </div>
-
-        <!-- Lista komentara -->
-        <h3>Comments:</h3>
-        <ul class="comments-list">
-          <li v-for="comment in post.comments" :key="comment.id" class="comment-item">
-            <strong>{{ comment.username }}:</strong> {{ comment.content }}
-          </li>
-        </ul>
-
-        <!-- Akcije na postu -->
-        <!-- <div class="post-actions">
-          <button @click="openEditModal(post)" class="edit-button">Edit</button>
-          <button @click="deletePost(post.id)" class="delete-button">Delete</button>
-        </div> -->
-      </div>
+       
     </div>
-  </div>
-</main>
-
-
-
-
-
-
-        <!-- Modal for Editing Post -->
-          <!-- <div v-if="showEditModal" class="modal">
-            <div class="modal-content">
-                <h2>Edit Post</h2>
-                <label for="imageUrl">Image URL:</label>
-                <input v-model="editData.imageUrl" id="imageUrl" placeholder="Enter new image URL" />
-
-                <label for="description">Description:</label>
-                <textarea v-model="editData.description" id="description" placeholder="Enter new description"></textarea>
-
-                <div class="modal-actions">
-                    <button @click="confirmEdit" class="confirm-button">Save</button>
-                    <button @click="closeEditModal" class="cancel-button">Cancel</button>
-                </div>
-            </div> 
-        </div>-->
-    </div>  
 
   <div v-if="showAddPostModal" class="modal add-post-modal">
     <div class="modal-content">
@@ -132,13 +87,6 @@
 import SignOutButton from './SignOutButton.vue';
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-delete L.Icon.Default.prototype._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
-});
 
 export default {
     components: {
@@ -164,6 +112,8 @@ export default {
           map: null,
           marker: null,
           selectedFile: null,
+          newCommentContent: {},
+          errorMessages: {},
         };
     },
 
@@ -179,6 +129,7 @@ export default {
         await this.checkRegistered();
         const token = sessionStorage.getItem('token');
         console.log('Token:', token);
+        
 
         if (this.isRegistered && token) {
             this.fetchPosts();
@@ -187,12 +138,58 @@ export default {
         }
     },
     methods: {
+        async addComment(postId) {
+          const token = sessionStorage.getItem("token");
+          const content = this.newCommentContent[postId];
+
+          if (!content) {
+            this.errorMessages[postId] = "Comment cannot be empty.";
+            return;
+          }
+
+          try {
+            const response = await fetch(`http://localhost:8080/comments/create`, {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams({ postId, content }),
+            });
+
+            if (response.ok) {
+              const newComment = await response.json();
+              const post = this.posts.find((p) => p.id === postId);
+              if (post) {
+                post.comments.push({
+                  id: newComment.id,
+                  content: newComment.content,
+                  username: newComment.username,
+                });
+              }
+              this.newCommentContent[postId] = "";
+              this.errorMessages[postId] = null;
+              console.log("Comment added successfully.");
+            } else if (response.status === 429) {
+              const errorData = await response.json();
+              this.errorMessages[postId] = errorData.error || "You have reached the comment limit.";
+            } else {
+              this.errorMessages[postId] = "Failed to add comment. Please try again.";
+              console.error("Failed to add comment:", await response.text());
+            }
+          } catch (error) {
+            this.errorMessages[postId] = "Error adding comment. Please try again later.";
+            console.error("Error adding comment:", error.message);
+          }
+        },
+
+      goToFollowingPosts() {
+        window.location.href = "http://localhost:8081/";
+    },
       onFileSelected(event) {
         this.selectedFile = event.target.files[0];
-        console.log("File selected:", this.selectedFile);
       },
       async createPost() {
-        console.log("Save button clicked - createPost method triggered");
         const token = sessionStorage.getItem('token');
         const formData = new FormData();
         formData.append("imageFile", this.selectedFile);
@@ -201,21 +198,13 @@ export default {
         formData.append("longitude", this.newPost.longitude);
         formData.append("location", this.newPost.location);
 
-        
-
-
-     
-
-
         try {
           const response = await fetch("http://localhost:8080/posts/create", {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${token}`,
-              // "Content-Type": "application/json" /////ovo sam dodala
+              "Authorization": `Bearer ${token}`
             },
             body: formData,
-           //body: JSON.stringify(postDto),
           });
 
           if (response.ok) {
@@ -234,7 +223,7 @@ export default {
 
         async checkRegistered() {
             const userType = sessionStorage.getItem('userType');
-            this.isRegistered = userType === 'ROLE_REGISTERED';
+            this.isRegistered = userType === 'REGISTERED';
         },
 
         async fetchPosts() {
@@ -263,13 +252,38 @@ export default {
 
                 const data = await response.json();
                 this.posts = data;
+                ///////////
+                console.log("Postovi:", this.posts[0]);
+                /////////
             } catch (error) {
                 console.error("An error occurred while loading posts:", error.message);
             }
         },
 
-    
-      
+        async deletePost(postId) {
+            const token = sessionStorage.getItem('token');
+            try {
+                const response = await fetch(`http://localhost:8080/posts/delete/${postId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (response.ok) {
+                    console.log(`Post with ID ${postId} has been deleted.`);
+                    this.posts = this.posts.filter(post => post.id !== postId);
+                } else {
+                    console.error("Error deleting post.");
+                }
+            } catch (error) {
+                console.error("An error occurred while deleting the post:", error.message);
+            }
+        },
+
+       
+       
 
         // Function to handle redirection and saving the token
         goHome() {
@@ -334,6 +348,32 @@ export default {
           this.newPost.location = "Error loading location";
         }
       },
+      checkAuthAndNavigateToProfile() {
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      this.$router.push('/profileN'); // Only redirect if user is logged in
+    } else {
+      this.$router.push('/login'); // Otherwise redirect to login
+    }
+   
+  
+},
+navigateToNearbyPosts() {
+      console.log("nadjiki")
+      const token = sessionStorage.getItem('token');
+    if (token) {
+      this.$router.push({ path: '/nearby-posts', query: { token } });
+    } else {
+      console.error('Token not found. Redirecting to login.');
+      this.$router.push('/login'); // Ako nema tokena, preusmeri na login stranicu
+    }
+    
+   
+  },
+checkAuthAndNavigateToTrends(){
+    
+      this.$router.push('/trend');
+    },
 
       clearNewPostForm() {
         this.newPost = {
@@ -348,10 +388,39 @@ export default {
         }
       },
     },
+ 
 };
 </script>
 
 <style scoped>
+
+.post-description {
+  background-color: #f9f9f9; /* Svetla pozadina za post */
+  border: 2px solid #685cd5; /* Blaga granica oko opisa */
+  border-radius: 8px; /* Zaobljeni uglovi */
+  padding: 15px; /* Unutrašnji razmak */
+  margin-top: 20px; /* Razmak od drugih sekcija */
+}
+
+.post-description h3 {
+  font-size: 22px; /* Veća veličina za naslov */
+  color: #333; /* Tamnija boja za bolji kontrast */
+  margin-bottom: 10px; /* Razmak između naslova i opisa */
+  font-weight: bold; /* Podebljan font za naslov */
+}
+
+.post-description p {
+  font-size: 16px; /* Veličina fonta za tekst opisa */
+  color: #555; /* Siva boja za tekst */
+  line-height: 1.6; /* Veći razmak između redova */
+  word-wrap: break-word; /* Prelomi dugi tekst na sledeći red */
+}
+
+.home-navigation ul li a:hover {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Dodaje senku */
+  transform: translateY(-5px); /* Podiže link nagore za 5px */
+}
+
 .home-navigation {
     margin-bottom: 20px;
     text-align: center;
@@ -368,9 +437,13 @@ export default {
 }
 
 .home-navigation ul li a {
-    text-decoration: none;
-    font-size: 18px;
-    color: #d35400;
+  color: #333; /* Osnovna boja teksta */
+  text-decoration: none; /* Uklanja podvlačenje */
+  padding: 10px 15px; /* Razmak unutar linka */
+  display: inline-block; /* Čini elementima da poštuju padding */
+  transition: all 0.3s ease; /* Glatka tranzicija efekta */
+  border-radius: 5px; /* Blago zaobljeni uglovi */
+  cursor: pointer; /* Strelica za klikalne elemente */
 }
 
 .home-navigation ul li i {
@@ -381,7 +454,7 @@ export default {
 .home-button {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #ffb347; /* Green color */
+    background-color: #28a745; /* Green color */
     color: white;
     font-size: 18px;
     text-decoration: none;
@@ -390,52 +463,100 @@ export default {
 }
 
 .home-button:hover {
-    background-color: #ff9a3b;
+    background-color: #218838; /* Darker green on hover */
 }
 
 .home-content {
     margin-top: 20px;
 }
-
 .posts-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 100px; /* Razmak između postova u grid-u */
+    justify-content: center;
+    align-items: center; 
 }
 
 .post {
-    flex: 1 1 calc(25% - 20px);
+    width: 350px;
+    height: 800px;
     background-color: #f9f9f9;
-    border: 1px solid #ccc;
+    border: 2px solid #195b28;
     border-radius: 8px;
-    padding: 10px;
+    padding: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    margin-bottom: 20px; /* Razmak između postova (ako je potreban) */
 }
+
 
 .post-image {
-    max-width: 100%;
-    height: auto;
+    width: 100%; /* Slika će zauzeti celu širinu */
+    height: 250px; /* Fiksna visina slike */
+    object-fit: cover; /* Izrezivanje slike da stane u okvir */
     border-radius: 5px;
     margin-bottom: 10px;
 }
+
+.add-comment {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.add-comment textarea {
+  width: 80%;
+  height: 40px;
+  margin-bottom: 5px;
+  border: 1px solid #ddd;
+}
+
+.add-comment button {
+  padding: 5px 10px;
+  background-color: #0c1e5e;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-comment button:hover {
+  background-color: #4b3ca7;
+}
+
 
 .comments-list {
-    list-style-type: none;
-    padding-left: 0;
+  flex-grow: 1;
+  list-style-type: none;
+  padding: 0;
+  margin: 10px 0 0 0; /* Razmak između slike i komentara */
+  overflow-y: auto;
+  max-height: 190px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  margin-left: 20px;
 }
 
+
 .comment-item {
-    background-color: #ffecd9;
-    /* border: 1px solid #ddd; */
-    border-radius: 5px;
-    margin-bottom: 10px;
-    padding: 5px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px; /* Razmak između komentara */
+  padding: 5px;
+  font-size: 14px;
+  word-wrap: break-word; /* Prelamanje dugih reči */
 }
+
 
 .post-actions {
     display: flex;
     gap: 10px;
+    margin-top: 10px;
 }
 
 .edit-button, .delete-button {
@@ -446,7 +567,7 @@ export default {
 }
 
 .edit-button {
-    background-color: #ff8c00;
+    background-color: #0c1e5e;
     color: white;
 }
 
@@ -489,7 +610,7 @@ export default {
 }
 
 .confirm-button {
-  background-color: #ffb347;
+  background-color: #28a745;
   color: white;
 }
 
@@ -502,7 +623,7 @@ export default {
   margin-left: 20px;
   display: inline-block;
   padding: 10px 20px;
-  background-color: #ff9a3b;
+  background-color: #28a745;
   color: white;
   font-size: 18px;
   text-decoration: none;
@@ -510,7 +631,7 @@ export default {
 }
 
 .add-post-button:hover {
-  background-color: #ffb347;
+  background-color: #0056b3;
 }
 
 /* Styling for Add Post Modal */
@@ -557,7 +678,7 @@ export default {
 }
 
 .add-post-modal .confirm-button {
-  background-color: #ff9a3b;
+  background-color: #28a745;
   color: white;
 }
 
@@ -572,6 +693,19 @@ export default {
   width: 100%;
   border: 1px solid #ccc;
   border-radius: 5px;
+}
+
+.likes-container {
+  display: flex; /* Postavlja elemente jedan pored drugog */
+  align-items: center; /* Poravnava ih vertikalno na sredinu */
+  gap: 10px; /* Razmak između h3 i p */
+  margin-left: 20px; /* Pomera likove udesno */
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
 }
 
 </style>

@@ -1,8 +1,9 @@
- <template>
+<template>
   <div class="form">
     <h2>{{ isRegister ? 'Registration' : 'Log in' }}</h2>
     <HomeButton />
 
+    <!-- Registration Form -->
     <template v-if="isRegister">
       <input type="text" v-model="username" placeholder="Enter your username" />
       <input type="email" v-model="registerEmail" placeholder="Enter your email" />
@@ -14,27 +15,26 @@
       <button @click="register" class="my-button2">Register</button>
     </template>
 
+    <!-- Login Form -->
     <template v-else>
       <input type="email" v-model="email" placeholder="Enter your email" />
       <input type="password" v-model="password" placeholder="Enter your password" />
       <button @click="login" class="my-button2">Log in</button>
     </template>
 
+    <!-- Toggle Register/Login Form -->
     <button @click="toggleForm" class="toggle-button2">
       {{ isRegister ? 'Already have an account? Log in' : 'Don\'t have an account? Register' }}
     </button>
   </div>
-</template> 
-
-
+</template>
 
 <script>
 import HomeButton from './HomePageButton.vue';
 
 export default {
-  components:{
+  components: {
     HomeButton,
-
   },
   data() {
     return {
@@ -47,47 +47,71 @@ export default {
       lastName: "",
       address: "",
       email: "",
-      password: ""
+      password: "",
     };
+  },
+  mounted() {
+    // Automatically call the API to update passwords when the page loads
+    this.updatePasswords();
   },
   methods: {
     toggleForm() {
       this.$router.push({ name: 'Register' });
-      
-    },  
-  
-    async login() {
-  try {
-    const response = await fetch("http://localhost:8080/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: this.email, password: this.password })
-    });
+    },
 
-    const data = await response.json();
+    async updatePasswords() {
+      try {
+        const response = await fetch("http://localhost:8080/updatePasswords", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
 
-    if (response.ok) {
-      console.log("User role: ", data.userType);
+        const data = await response.json();
 
-      // Sačuvaj token i tip korisnika u sessionStorage
-      sessionStorage.setItem('token', data.token); // Sačuvaj token
-      sessionStorage.setItem('userType', data.userType); // Sačuvaj tip korisnika
-
-      // Ako je korisnik admin, preusmeri ga na Admin stranicu
-      if (data.userType === "ROLE_ADMIN") {
-        this.$router.push({ name: "Admin" });
-      } else if (data.userType === "ROLE_REGISTERED") {
-        this.$router.push({ name: "Registered" });
-      } else {
-        alert("Unknown user type.");
+        if (response.ok) {
+          console.log("Passwords updated successfully:", data);
+        } else {
+          console.error("Error updating passwords:", data.message || "Unknown error");
+        }
+      } catch (error) {
+        console.error("An error occurred while updating passwords:", error.message);
       }
-    } else {
-      alert(data.message || "Error during login!");
-    }
-  } catch (error) {
-    alert("An error occurred: " + error.message);
-  }
-},
+    },
+    
+
+    async login() {
+      try {
+        const response = await fetch("http://localhost:8080/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: this.email, password: this.password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log("User role:", data.userType);
+
+          // Save token and user type in sessionStorage
+          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('userType', data.userType);
+
+          // Redirect based on user type
+          if (data.userType === "ADMIN") {
+            this.$router.push({ name: "Admin" });
+          } else if (data.userType === "REGISTERED") {
+            this.$router.push({ name: "Registered" });
+          } else {
+            alert("Unknown user type.");
+          }
+        } else {
+          alert(data.message || "Error during login!");
+        }
+      } catch (error) {
+        alert("An error occurred: " + error.message);
+      }
+    },
+
     async register() {
       if (this.registerPassword !== this.confirmPassword) {
         alert("Passwords do not match.");
@@ -104,38 +128,38 @@ export default {
             password: this.registerPassword,
             firstName: this.firstName,
             lastName: this.lastName,
-            address: this.address
-          })
+            address: this.address,
+          }),
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          alert("Registration successful!");
+          alert("Registration successful! Please check your email for activation.");
         } else {
           alert(data.message || "Registration failed. Please try again.");
         }
       } catch (error) {
         alert("An error occurred: " + error.message);
       }
- 
     }
   }
 };
 </script>
 
+
 <style scoped>
 .form {
-  margin-top: 30px; /* Prilagođava položaj */
-  margin-left: auto; /* Centriranje horizontalno */
-  margin-right: auto; /* Centriranje horizontalno */
+  margin-top: 30px; /* Adjust margin to position lower */
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto; /* Center horizontally */
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #ffecd9; /* Svetlo narandžasta pozadina */
+  background-color: #7fc59e;
   border-radius: 15px;
-  padding: 30px; /* Veći padding za više prostora oko sadržaja */
-  width: 600px; /* Širina za bolji raspored */
+  padding: 30px; /* Increased padding for more space around */
+  width: 400px; /* Increased width for better spacing */
   height: auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   gap: 20px;
@@ -144,46 +168,45 @@ export default {
 h2 {
   font-size: 34px;
   margin-bottom: 20px;
-  color: #d35400; /* Tamnija narandžasta za naslov */
+  color: #eeffef;
 }
 
 .input-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Dve kolone */
-  gap: 10px; /* Razmak između polja */
-  width: 100%; /* Pun široki prikaz */
+  grid-template-columns: 1fr 1fr; /* Two columns */
+  gap: 10px; /* Space between fields */
+  width: 100%; /* Full width */
 }
 
 input {
   font-size: 19px;
   height: 50px;
   padding: 10px;
-  border: 1px solid #f0a97e; /* Svetlija narandžasta ivica */
+  border: 1px solid #0c623b;
   border-radius: 15px;
-  background-color: #fff9f0; /* Svetlo narandžasta pozadina unosa */
 }
 
 .button-container2 {
-  display: flex; /* Centriranje dugmeta */
+  display: flex; /* Center button */
   justify-content: center;
-  margin-top: 20px; /* Prostor iznad dugmeta */
-  width: 100%; /* Pun široki prikaz dugmeta */
+  margin-top: 20px; /* Adds space above the button */
+  width: 100%; /* Full width for button */
 }
 
 .my-button2 {
   width: 150px;
   height: 40px;
-  background-color: #ff9a3b; /* Tamnija narandžasta za dugme */
+  background-color: #0c623b;
   color: white;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: medium;
+  font-size: medium
 }
 
 .my-button2:hover {
-  background-color: #d35400; /* Još tamnija narandžasta na hover */
+  background-color: #0c623b;
 }
 
 .toggle-button2 {
@@ -191,7 +214,7 @@ input {
   background: none;
   border: none;
   font-size: 15px;
-  color: #d35400; /* Tamnija narandžasta za tekst dugmeta */
+  color: #000;
   cursor: pointer;
   text-decoration: underline;
 }

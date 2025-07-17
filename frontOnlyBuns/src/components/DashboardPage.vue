@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="dashboard">
     <h1>Dashboard</h1>
     <p>This is your dashboard where you can see various stats and information.</p>
@@ -17,4 +17,4 @@ export default {
   padding: 20px;
   font-family: Arial, sans-serif;
 }
-</style>
+</style> -->

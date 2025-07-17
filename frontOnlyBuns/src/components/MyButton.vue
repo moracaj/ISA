@@ -24,61 +24,58 @@ export default {
 
   
   <style>
-
 .button-container {
   display: flex; 
-  position: fixed; /* Fiksiran položaj */
-  top: 30px; /* 30px od vrha */
-  right: 30px; /* 30px od desne ivice */
-  gap: 10px; /* Razmak između dugmadi */
-  flex-wrap: wrap; /* Dozvoljava dugmadima da prelome u novi red ako je potrebno */
+  position: fixed; /* Fixed position */
+  top: 30px; /* 30px from the top */
+  right: 30px; /* 30px from the right */
+  gap: 10px; /* Space between buttons */
+  flex-wrap: wrap; /* Allows buttons to wrap if necessary */
 }
 
-/* Stil za dugmad */
 .my-button {
-  padding: 15px;
+  padding: 15px; /* Padding for the button */
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 1em;
-  flex: 1;
-  min-width: 90px;
-  max-width: 50%;
-  box-sizing: border-box;
+  font-size: 1em; /* Font size */
+  flex: 1; /* Allows buttons to be the same width */
+  min-width: 90px; /* Minimum button width */
+  max-width: 50%; /* Makes text responsive */
+  box-sizing: border-box; /* Include padding in width calculations */
 }
 
-/* Stil za prvo dugme (Log in) */
+/* Styles for the first button (Log in) */
 .my-button.login {
-  background-color: #ff9a3b; /* Svetlija narandžasta */
-  color: white;
+  background-color: #0c623b; /* Dark red background */
+  color: white; /* White text */
 }
 
 .my-button.login:hover {
-  background-color: #d35400; /* Tamnija narandžasta na hover */
+  background-color: #0c623b; /* Slightly lighter on hover */
 }
 
-/* Stil za drugo dugme (Sign in) */
+/* Styles for the second button (Sign in) */
 .my-button.register {
-  background-color: white; /* Bela pozadina */
-  color: #ff9a3b; /* Svetlija narandžasta za tekst */
-  border: 2px solid #ff9a3b; /* Svetlija narandžasta za ivicu */
+  background-color: white; /* White background */
+  color: #0c623b; /* Dark red text */
+  border: 2px solid #0c623b; /* Dark red border */
 }
 
 .my-button.register:hover {
-  background-color: #ffe0b2; /* Svetlija narandžasta na hover */
+  background-color: #f2f2f2; /* Light gray background on hover */
 }
 
-/* Stil za sliku zeca */
 .rabbit-gif {
-  position: fixed; /* Pozicioniranje slike u gornji levi ugao */
+  position: fixed; /* Sticks logo to the top-left corner */
   top: 20px;
   left: 20px;
-  width: 150px;
-  height: auto;
+  width: 150px; /* Adjusted width for responsive layout */
+  height: auto; /* Maintains aspect ratio */
   z-index: 10;
   border-radius: 15px;
   padding: 5px;
-  background-color: #ffd1a9; /* Svetlo narandžasta pozadina za sliku */
+
 }
 
   </style>

@@ -1,61 +1,38 @@
+
+
 <template>
   <div class="admin-page">
     <h2>Admin Dashboard</h2>
-    <SignOutButton/>
-    
+    <SignOutButton />
+
     <div v-if="isAdmin">
-      <!-- Load Registered Users Button -->
-      <button @click="fetchRegisteredUsers" class="my-button">Load Registered Users</button>
+      <router-link to="/list-of-posts" class="my-link">List of Posts</router-link>
 
-      <!-- Search Form -->
-      <div class="search-form">
-        <h3>Search Registered Users:</h3>
-        <input type="text" v-model="searchCriteria.firstName" placeholder="First Name" />
-        <input type="text" v-model="searchCriteria.lastName" placeholder="Last Name" />
-        <input type="text" v-model="searchCriteria.email" placeholder="Email" />
-        <input type="number" v-model="searchCriteria.minPosts" placeholder="Min Posts" />
-        <input type="number" v-model="searchCriteria.maxPosts" placeholder="Max Posts" />
-        <button @click="searchRegisteredUsers" class="my-button">Search</button>
-      </div>
+      <div v-if="posts.length">
+        <div v-for="post in posts" :key="post.id" class="user-card">
+          <p><strong>User:</strong> {{ post.username }}</p>
+          <p><strong>Description:</strong> {{ post.description }}</p>
+          <p><strong>Date:</strong> {{ post.createdAt }}</p>
+          <img v-if="post.imageUrl" :src="post.imageUrl" alt="Post image" width="150" />
 
-      <!-- Sort Options -->
-      <div class="sort-options">
-        <label for="sortAttribute">Sort by:</label>
-        <select v-model="sortAttribute" id="sortAttribute">
-          <option value="email">Email</option>
-          <option value="followersCount">Followers Count</option>
-        </select>
+          <div v-if="post.comments.length">
+            <h4>Comments:</h4>
+            <ul>
+              <li v-for="comment in post.comments" :key="comment.id">
+                {{ comment.username }}: {{ comment.content }} ({{ comment.createdAt }})
+              </li>
+            </ul>
+          </div>
 
-        <label for="sortOrder">Order:</label>
-        <select v-model="sortOrder" id="sortOrder">
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-        <button @click="sortRegisteredUsers" class="my-button">Sort</button>
-      </div>
-
-      <!-- Registered Users List -->
-      <div v-if="registeredUsers.length">
-        <h3>List of Registered Users:</h3>
-        <div v-for="user in registeredUsers" :key="user.id" class="user-card">
-          <p><strong>First name:</strong> {{ user.firstName }} </p>
-          <p><strong>Last name:</strong> {{ user.lastName }}</p>
-          <p><strong>Email:</strong> {{ user.email }}</p>
-          <p><strong>Posts Count:</strong> {{ user.postsCount }}</p>
-          <p><strong>Followers Count:</strong> {{ user.followersCount }}</p>
+          <button class="my-button" @click="promotePost(post.id)">Promote Post</button>
         </div>
       </div>
 
-      <!-- Error or No Users Found -->
-      <div v-else>
-        <p>No registered users found.</p>
-      </div>
       <div v-if="errorMessage" class="error-message">
         <p>{{ errorMessage }}</p>
       </div>
     </div>
 
-    <!-- Permission Message -->
     <div v-else>
       <p>You do not have permission to view this page.</p>
     </div>
@@ -68,137 +45,129 @@ import SignOutButton from './SignOutButton.vue';
 export default {
   data() {
     return {
-      registeredUsers: [],
+      posts: [],
       isAdmin: false,
-      errorMessage: '',
-      searchCriteria: {
-        firstName: '',
-        lastName: '',
-        email: '',
-        minPosts: 0,  // Default 0 for search, it will only show users with at least 0 posts
-        maxPosts: 0   // Default 0 for search, it will allow all users up to 0 posts
-      },
-
-      sortAttribute: 'email',
-      sortOrder: 'asc'
+      errorMessage: ''
     };
-  },
-  created() {
-    this.checkAdmin();
-    const token = sessionStorage.getItem('token');
-    if (this.isAdmin && token) {
-      this.fetchRegisteredUsers();
-    }
   },
   components: {
     SignOutButton
+  },
+  created() {
+    this.checkAdmin();
   },
   methods: {
     async checkAdmin() {
       const userType = sessionStorage.getItem('userType');
       this.isAdmin = userType === 'ADMIN';
-    },
-
-    async fetchRegisteredUsers() {
-      this.errorMessage = '';
-      const token = sessionStorage.getItem('token');
-      if (this.isAdmin && token) {
-        try {
-          const response = await fetch("http://localhost:8080/registered-users", {
-            method: "GET",
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            this.registeredUsers = data;
-          } else {
-            this.errorMessage = 'Failed to load registered users';
-          }
-        } catch (error) {
-          this.errorMessage = "An error occurred while loading registered users: " + error.message;
-        }
-      } else {
-        this.errorMessage = "You do not have permission to fetch registered users.";
+      if (this.isAdmin) {
+        this.fetchAllPosts();
       }
     },
 
-    async searchRegisteredUsers() {
-      this.errorMessage = '';
+    async fetchAllPosts() {
       const token = sessionStorage.getItem('token');
-      if (this.isAdmin && token) {
-        try {
-          const queryParams = new URLSearchParams();
-
-          // Add search criteria only if they're not empty
-          Object.keys(this.searchCriteria).forEach(key => {
-            if (this.searchCriteria[key] !== null && this.searchCriteria[key] !== '') {
-              queryParams.append(key, this.searchCriteria[key]);
-            }
-          });
-
-          const response = await fetch(`http://localhost:8080/searchReg?${queryParams.toString()}`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          const data = await response.json();
-          if (data.length === 0) {
-            this.registeredUsers = []; 
-            this.errorMessage = 'No users found matching your criteria.';
-          } else {
-            this.registeredUsers = data;
+      try {
+        const response = await fetch('http://localhost:8080/posts/allPosts', {
+          headers: {
+            'Authorization': `Bearer ${token}`
           }
-        } catch (error) {
-          this.errorMessage = 'An error occurred while searching for registered users: ' + error.message;
-        }
-      } else {
-        this.errorMessage = 'You do not have permission to search registered users.';
-      }
-    },
-
-    sortRegisteredUsers() {
-      if (this.sortAttribute && this.sortOrder) {
-        this.registeredUsers.sort((a, b) => {
-          let comparison = 0;
-          if (a[this.sortAttribute] > b[this.sortAttribute]) {
-            comparison = 1;
-          } else if (a[this.sortAttribute] < b[this.sortAttribute]) {
-            comparison = -1;
-          }
-          return this.sortOrder === 'asc' ? comparison : -comparison;
         });
+        if (response.ok) {
+          this.posts = await response.json();
+        } else {
+          this.errorMessage = "Failed to load posts.";
+        }
+      } catch (error) {
+        this.errorMessage = "Error fetching posts: " + error.message;
+      }
+    },
+
+    async promotePost(postId) {
+      const token = sessionStorage.getItem('token');
+      try {
+       // const response = await fetch(`http://localhost:8080/promote/${postId}`, {
+       const response=  await fetch(`http://localhost:8080/posts/promote/${postId}`, {
+       method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          alert('Post promoted successfully!');
+        } else {
+          alert('Failed to promote post.');
+        }
+      } catch (error) {
+        alert('Error promoting post: ' + error.message);
       }
     }
   }
 };
 </script>
 
+
+
+
+
 <style scoped>
 .admin-page {
   margin: 20px;
   padding: 20px;
-  background-color: #f3f4f6;
+  background-color: #d2f3dc;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
+
+
+
+.admin-header {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  font-size: 16px;
   color: #1c6124;
+  background-color: #f0f8f2;
+  padding: 5px 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.user-card {
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
-  margin-bottom: 10px;
+h2 {
+  font-size: 38px; 
+  color: #1c6124;
 }
+.pagination-controls {
+  display: flex; /* Poravnava dugmad i tekst u istoj liniji */
+  justify-content: center; /* Centriranje elemenata */
+  align-items: center; /* Vertikalno poravnanje */
+  gap: 10px; /* Razmak između elemenata */
+  margin-top: 20px; /* Udaljavanje cele sekcije od ostalog sadržaja */
+}
+
+.pagination-controls span {
+  padding: 5px 10px; /* Dodaje malo prostora unutar teksta */
+}
+
+
+.my-button:disabled {
+  background-color: #d3d3d3; /* Siva boja za onemogućena dugmad */
+  cursor: not-allowed; /* Zabrana akcije za onemogućena dugmad */
+}
+
+
+.user-card {
+  background-color: #f3fff7; /* Svetlo zelena pozadina */
+  border: 1px solid #467420;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 100px;
+  font-size: 18px; /* Povećanje veličine fonta */
+  width: 30%; /* Smanjenje širine kartice */
+  margin: 0 auto 10px auto; /* Centriranje kartice i razmak ispod */
+}
+
 
 .my-button {
   background-color: #1c6124;
@@ -207,11 +176,45 @@ h2 {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  text-decoration: none;
   transition: background-color 0.3s;
+  margin-top: 10px; /* Dodaje razmak iznad dugmeta */
 }
 
+/* Wrapper za linkove */
+.admin-page div:first-child {
+  margin-bottom: 10px; /* Manji razmak ispod linkova */
+  margin-top: -10px; /* Pomera linkove malo gore */
+}
+
+/* Individualni linkovi */
+.my-link {
+  color: #1c6124;
+  text-decoration: none;
+  margin-right: 15px;
+  font-size: 20px; /* Povećava font ako je potrebno */
+  display: inline-block; /* Obezbeđuje da linkovi ostanu u nizu */
+}
+
+.my-link:hover {
+  text-decoration: underline;
+  color: #15481b;
+}
 .my-button:hover {
-  background-color: #15481b;
+  background-color: #14501b;
+}
+.error-message {
+  color: red;
+  margin-top: 20px;
+}
+
+/* Stilovi za centriranje naslova */
+.search-form h3 {
+  width: 100%; /* Naslov zauzima ceo red */
+  text-align: center; /* Centriranje teksta */
+  color: #1c6124;
+  margin-bottom: 10px;
+  font-size: 24px;
 }
 
 .error-message {
@@ -221,4 +224,5 @@ h2 {
 .search-form, .sort-options {
   margin-bottom: 20px;
 }
-</style>
+
+</style> 
