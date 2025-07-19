@@ -23,8 +23,10 @@ public class InactivityNotifier {
 
 
   // @Scheduled(cron = "0 0/5 * * * ?") // Svakih 5 minuta
-   @Scheduled(cron = "0 19 21 * * ?") // Svakog dana u 9:00
-    public void notifyInactiveUsers() {
+   //@Scheduled(cron = "0 1 21 * * ?") // Svakog dana
+  //@Scheduled(fixedDelay = 60000) // svakog minuta
+
+  public void notifyInactiveUsers() {
        try {
            //LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
            //List<RegisteredUser> inactiveUsers = userRepository.findByLastActiveDateBefore(oneWeekAgo);
@@ -35,7 +37,7 @@ public class InactivityNotifier {
 
            for (RegisteredUser user : inactiveUsers) {
                String summary = userActivityService.generateWeeklySummary(user);
-               emailService.sendSimpleEmail(user.getEmail(), "We miss you!", summary);
+               emailService.sendSimpleEmail(user.getEmail(), "Dugo nisi aktivan!", summary);
 
                System.out.println("Našao!");
 

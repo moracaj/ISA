@@ -2,8 +2,8 @@ package com.project.onlybuns.service;
 
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.CommentRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 

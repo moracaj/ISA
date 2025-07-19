@@ -2,7 +2,6 @@ package com.project.onlybuns.service;
 
 
 import com.project.onlybuns.model.RegisteredUser;
-
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,10 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RegisteredUserService {
@@ -203,30 +200,30 @@ public class RegisteredUserService {
         registeredUserRepository.save(followed);
     }*/
 
-    @Transactional
-    public void followUser(Long followerId, Long followedId) {
-
-        if (followerId.equals(followedId)) {
-            throw new IllegalArgumentException("You cannot follow yourself.");
-        }
-
-        RegisteredUser follower = registeredUserRepository.findById(followerId)
-                .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
-        RegisteredUser followed = registeredUserRepository.findById(followedId)
-                .orElseThrow(() -> new IllegalArgumentException("Followed user not found."));
-
-
-
-
-
-
-
-
-        // Spasavanje ažuriranih korisnika
-        registeredUserRepository.save(follower);
-        registeredUserRepository.save(followed);
-    }
-
+//    @Transactional
+//    public void followUser(Long followerId, Long followedId) {
+//
+//        if (followerId.equals(followedId)) {
+//            throw new IllegalArgumentException("You cannot follow yourself.");
+//        }
+//
+//        RegisteredUser follower = registeredUserRepository.findById(followerId)
+//                .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
+//        RegisteredUser followed = registeredUserRepository.findById(followedId)
+//                .orElseThrow(() -> new IllegalArgumentException("Followed user not found."));
+//
+//
+//
+//
+//
+//
+//
+//
+//        // Spasavanje ažuriranih korisnika
+//        registeredUserRepository.save(follower);
+//        registeredUserRepository.save(followed);
+//    }
+//
 
 
 

@@ -1,14 +1,24 @@
 package com.project.onlybuns.service;
 
+import com.project.onlybuns.dto.PostDto;
 import com.project.onlybuns.model.Post;
 import com.project.onlybuns.model.NotFoundPostException;
-import com.project.onlybuns.model.User;
+import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.PostRepository;
-import com.project.onlybuns.repository.UserRepository;
+import com.project.onlybuns.repository.RegisteredUserRepository;
+import jakarta.persistence.Cacheable;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+//import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +29,13 @@ public class PostService {
     private final PostRepository postRepository;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
+
 
     public List<Post> findAll() {
         return postRepository.findAll();
@@ -37,9 +51,28 @@ public class PostService {
 
 
 
-   /* public List<Post> findAllActivePosts() {
-        return postRepository.findByIsDeletedFalse(); // Metoda koja vraća sve aktivne objave
-    }*/
+
+
+//    public long countPostsForWeek() {
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime startOfWeek = now.minus(1, ChronoUnit.WEEKS);
+//        return postRepository.findPostsByDateRange(startOfWeek, now).size();
+//    }
+//
+//
+//
+//
+//    public long countPostsForMonth() {
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime startOfMonth = now.minus(1, ChronoUnit.MONTHS);
+//        return postRepository.findPostsByDateRange(startOfMonth, now).size();
+//    }
+//
+//    public long countPostsForYear() {
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime startOfYear = now.minus(1, ChronoUnit.YEARS);
+//        return postRepository.findPostsByDateRange(startOfYear, now).size();
+//    }
 
 
 
@@ -64,14 +97,16 @@ public class PostService {
         // Sačuvaj ažuriranu objavu u bazi
         return postRepository.save(existingPost);
     }
+
     public void delete(Long id) {
         postRepository.deleteById(id); // Ova metoda ne treba da vraća ništa
     }
+
     @Autowired
-    private UserRepository registeredUserRepository; // Dodajte ovo
+    private RegisteredUserRepository registeredUserRepository; // Dodajte ovo
 
     public List<Post> findByUserId(Long userId) {
-        User user = registeredUserRepository.findById(userId)
+        RegisteredUser user = registeredUserRepository.findById(userId)
                 .orElse(null); // Pronađite korisnika po ID-ju
 
         if (user != null) {
@@ -86,7 +121,41 @@ public class PostService {
     }
 
 
+    @org.springframework.cache.annotation.Cacheable("Post")
+    public int getTotalPostsCount() {
+        return postRepository.findAll().size();
+    }
+    @org.springframework.cache.annotation.Cacheable("Post")
+    public List<Post> findPostsFromLastMonth() {
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        return postRepository.findPostsAfterDate(thirtyDaysAgo);
+    }
+
+
+
+//    public List<PostDto> getPostsLocations() {
+//        List<Post> posts = postRepository.findAll();
+//        return posts.stream()
+//                .filter(post -> post.getLatitude() != null && post.getLongitude() != null)
+//                .map(post -> new PostDto(
+//                        post.getImageUrl(),
+//                        post.getLatitude(),
+//                        post.getLongitude(),
+//                        post.getDescription()))
+//                .toList();
+//    }
+public List<PostDto> getPostsLocations() {
+    List<Post> posts = postRepository.findAllWithCoordinates();
+    return posts.stream()
+            .map(post -> new PostDto(
+                    post.getImageUrl(),
+                    post.getLatitude(),
+                    post.getLongitude(),
+                    post.getDescription()))
+            .toList();
+}
 
 
 
 }
+

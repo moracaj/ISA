@@ -1,4 +1,5 @@
 package com.project.onlybuns.service; // ili .messaging ako si stavio u novi paket
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
