@@ -21,7 +21,7 @@ export default {
     this.initializeMap();
     
     // Refresh map data every 5 seconds
-    setInterval(this.refreshMapData, 5000);
+    setInterval(this.refreshMapData, 500000);
   },
   methods: {
     // Initialize the map
@@ -52,9 +52,9 @@ export default {
       // Fetch user's location
       this.fetchUserLocation(username);
       // Fetch nearby posts
-      this.fetchNearbyPosts();
+     // this.fetchNearbyPosts(); ovo je rekao da obrisem
       // Fetch care locations
-      this.fetchCareLocations();
+     // this.fetchCareLocations();
     },
 
     // Fetch user's location
@@ -80,6 +80,8 @@ export default {
               .bindPopup("<b>" + username + "</b>")
               .openPopup();
           }
+          this.fetchNearbyPosts(latitude, longitude);
+
         })
         .catch((error) => {
           console.error("Error fetching user location:", error.message);
@@ -91,61 +93,98 @@ export default {
     },
 
     // Fetch nearby posts
-    fetchNearbyPosts() {
-      const postIcon = L.icon({
-        iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
-      });
+    // fetchNearbyPosts() {
+    //   const postIcon = L.icon({
+    //     iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+    //     iconSize: [32, 32],
+    //     iconAnchor: [16, 32],
+    //     popupAnchor: [0, -32],
+    //   });
 
-      axios
-        .get("http://localhost:8080/posts/locations")
-        .then((response) => {
-          response.data.forEach((post) => {
-            // Only attempt to add markers if the map is available
-            if (this.map) {
-              L.marker([post.latitude, post.longitude], { icon: postIcon })
-                .addTo(this.map)
-                .bindPopup(`
-                  <div style="text-align: center;">
-                    <b>${post.description}</b><br>
-                    <img src="${post.imageUrl}" alt="Image" style="width: 100px; height: 100px; object-fit: cover;">
-                  </div>
-                `);
-            }
-          });
-        })
-        .catch((error) => console.error("Error fetching posts:", error));
-    },
+    //   axios
+    //     .get("http://localhost:8080/posts/locations")
+    //     .then((response) => {
+    //        console.log("Received posts:", response.data); // dodaatoooooooooo
+    //       response.data.forEach((post) => {
+    //         // Only attempt to add markers if the map is available
+    //         if (this.map) {
+    //           L.marker([post.latitude, post.longitude], { icon: postIcon })
+    //             .addTo(this.map)
+    //             .bindPopup(`
+    //               <div style="text-align: center;">
+    //                 <b>${post.description}</b><br>
+    //                 <img src="${post.imageUrl}" alt="Image" style="width: 100px; height: 100px; object-fit: cover;">
+    //               </div>
+    //             `);
+    //         }
+    //       });
+    //     })
+    //     .catch((error) => console.error("Error fetching posts:", error));
+    // },
+
+    fetchNearbyPosts(latitude, longitude) {
+      console.log("Pozivam nearby sa: lat=", latitude, "lon=", longitude);
+
+  const postIcon = L.icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+
+  axios
+    .get(`http://localhost:8080/posts/nearby?lat=${latitude}&lon=${longitude}`)
+    .then((response) => {
+      console.log("Nearby posts:", response.data);
+      response.data.forEach((post) => {
+        if (this.map) {
+          L.marker([post.latitude, post.longitude], { icon: postIcon })
+            .addTo(this.map)
+            .bindPopup(`
+              <div style="text-align: center;">
+                <b>${post.description}</b><br>
+                <img src="${post.imageUrl}" alt="Image" style="width: 100px; height: 100px; object-fit: cover;">
+              </div>
+            `);
+        }
+      });
+    })
+    .catch((error) => console.error("Error fetching nearby posts:", error));
+},
+
+
+
+
+
+
 
     // Fetch care locations
-    fetchCareLocations() {
-      const careLocationIcon = L.icon({
-        iconUrl: "https://cdn-icons-png.flaticon.com/512/616/616557.png", // Care location icon
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32],
-      });
+    // fetchCareLocations() {
+    //   const careLocationIcon = L.icon({
+    //     iconUrl: "https://cdn-icons-png.flaticon.com/512/616/616557.png", // Care location icon
+    //     iconSize: [32, 32],
+    //     iconAnchor: [16, 32],
+    //     popupAnchor: [0, -32],
+    //   });
 
-      axios
-        .get("http://localhost:8080/care-location")
-        .then((response) => {
-          response.data.forEach((location) => {
-            // Only attempt to add markers if the map is available
-            if (this.map) {
-              L.marker([location.latitude, location.longitude], { icon: careLocationIcon })
-                .addTo(this.map)
-                .bindPopup(`
-                  <div style="text-align: center;">
-                    <b>${location.name}</b>
-                  </div>
-                `);
-            }
-          });
-        })
-        .catch((error) => console.error("Error fetching care locations:", error));
-    },
+    //   axios
+    //     .get("http://localhost:8080/care-location")
+    //     .then((response) => {
+    //       response.data.forEach((location) => {
+    //         // Only attempt to add markers if the map is available
+    //         if (this.map) {
+    //           L.marker([location.latitude, location.longitude], { icon: careLocationIcon })
+    //             .addTo(this.map)
+    //             .bindPopup(`
+    //               <div style="text-align: center;">
+    //                 <b>${location.name}</b>
+    //               </div>
+    //             `);
+    //         }
+    //       });
+    //     })
+    //     .catch((error) => console.error("Error fetching care locations:", error));
+    // },
 
     // Refresh map data every 5 seconds
     refreshMapData() {
@@ -164,7 +203,7 @@ export default {
 
         this.fetchUserLocation(username);
         this.fetchNearbyPosts();
-        this.fetchCareLocations();
+       // this.fetchCareLocations();
       }
     },
   },
