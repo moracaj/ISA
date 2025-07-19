@@ -1,16 +1,14 @@
 package com.project.onlybuns.controller;
-import com.project.onlybuns.DTO.RegisteredUserDTO;
 
-
-import com.project.onlybuns.DTO.SimpleUserDTO;
+import com.project.onlybuns.dto.RegisteredUserDto;
 import com.project.onlybuns.model.Post;
-
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,10 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 @RestController// Base path for registered user-related endpoints
@@ -145,7 +142,7 @@ public class RegisteredUserController {
 
 
     @GetMapping("/allRegisteredUsers")
-    public ResponseEntity<Page<RegisteredUserDTO>> getRegisteredUsers1(
+    public ResponseEntity<Page<RegisteredUserDto>> getRegisteredUsers1(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
 
@@ -158,7 +155,7 @@ public class RegisteredUserController {
 
 
         // Mapiranje na DTO
-        Page<RegisteredUserDTO> dtoPage = usersPage.map(user -> new RegisteredUserDTO(
+        Page<RegisteredUserDto> dtoPage = usersPage.map(user -> new RegisteredUserDto(
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
@@ -170,7 +167,7 @@ public class RegisteredUserController {
     }
 
     @GetMapping("/allRegisteredUsers1")
-    public ResponseEntity<List<RegisteredUserDTO>> getAllRegisteredUsers() {
+    public ResponseEntity<List<RegisteredUserDto>> getAllRegisteredUsers() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
@@ -179,7 +176,7 @@ public class RegisteredUserController {
         List<RegisteredUser> allUsers = registeredUserService.findAll();
 
         // Mapiranje na DTO listu
-        List<RegisteredUserDTO> userDTOs = allUsers.stream().map(user -> new RegisteredUserDTO(
+        List<RegisteredUserDto> userDTOs = allUsers.stream().map(user -> new RegisteredUserDto(
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
@@ -194,7 +191,7 @@ public class RegisteredUserController {
 
     @GetMapping("/registered-users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<RegisteredUserDTO>> getRegisteredUsers(
+    public ResponseEntity<Page<RegisteredUserDto>> getRegisteredUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
 
@@ -205,7 +202,7 @@ public class RegisteredUserController {
         Page<RegisteredUser> usersPage = registeredUserService.findAll(PageRequest.of(page, size));
 
         // Mapiranje na DTO
-        Page<RegisteredUserDTO> dtoPage = usersPage.map(user -> new RegisteredUserDTO(
+        Page<RegisteredUserDto> dtoPage = usersPage.map(user -> new RegisteredUserDto(
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
