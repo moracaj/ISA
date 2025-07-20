@@ -12,20 +12,20 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    //RegisteredUser findByUsername(String username);  // Metoda za pronalaženje korisnika po korisničkom imenu
-    boolean existsByUsername(String username); // Proverava da li korisničko ime već postoji
-   boolean existsByEmail(String email);
+    boolean userExistsByUsername(String username);
+    boolean userExistsByEmail(String email);
 
-    List<User> findByFirstNameContainingOrLastNameContainingOrEmailContaining(
-            String firstName, String lastName, String email);
-    List<User> findByPostsCountBetween(int min, int max);
-    Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
-    //RegisteredUser findByUsername(String username);
+    List<User> searchUsersByNameOrEmail(String firstName, String lastName, String email);
+
+    List<User> findUsersWithPostRange(int min, int max);
+
+    Optional<User> lookupByUsername(String username);
+
+    Optional<User> lookupByEmail(String email);
+
     @Query("SELECT u FROM User u WHERE u.username = :username AND u.userType = :userType")
-    Optional<User> findRegisteredUserByUsername(@Param("username") String username, @Param("userType") UserType userType);
+    Optional<User> getRegisteredUserByUsername(@Param("username") String username,
+                                               @Param("userType") UserType userType);
 
-    // Optional<User> findRegisteredUserByUsername(String username, UserType userType); // Vraća Optional<RegisteredUser>
-    List<User> findByUserType(UserType userType);
-   // List<User>findByUserId(UserType userType);
+    List<User> getUsersByType(UserType userType);
 }

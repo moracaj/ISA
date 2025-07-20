@@ -5,6 +5,7 @@ import com.project.onlybuns.model.NotFoundPostException;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.repository.PostRepository;
 import com.project.onlybuns.repository.UserRepository;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,77 +17,55 @@ import java.util.Optional;
 @Service
 public class PostService {
 
-    private final PostRepository postRepository;
+    private final PostRepository postRepo;
+    private final UserRepository userRepo;
 
     @Autowired
-    public PostService(PostRepository postRepository) {
-        this.postRepository = postRepository;
+    public PostService(PostRepository postRepo, UserRepository userRepo) {
+        this.postRepo = postRepo;
+        this.userRepo = userRepo;
     }
 
-    public List<Post> findAll() {
-        return postRepository.findAll();
+    public List<Post> getAllPosts() {
+        return postRepo.findAll();
     }
 
-    public Optional<Post> findById(Long id) {
-        return postRepository.findById(id);
+    public Optional<Post> getPostById(Long postId) {
+        return postRepo.findById(postId);
     }
 
-    public Post save(Post post) {
-        return postRepository.save(post);
+    public Post savePost(Post post) {
+        return postRepo.save(post);
     }
 
-
-
-   /* public List<Post> findAllActivePosts() {
-        return postRepository.findByIsDeletedFalse(); // Metoda koja vraća sve aktivne objave
-    }*/
-
-
+    public void removePost(Long postId) {
+        postRepo.deleteById(postId);
+    }
 
     @Transactional
-    public Post update(Post updatedPost) {
-        // Proveri da li post sa datim ID-om postoji
-        Post existingPost = postRepository.findById(updatedPost.getId())
-                .orElseThrow(() -> new NotFoundPostException("Post not found with id: " + updatedPost.getId()));
+    public Post modifyPost(Post postData) {
+        Post original = postRepo.findById(postData.getId())
+                .orElseThrow(() -> new NotFoundPostException("Post not found with id: " + postData.getId()));
 
-        // Proveri da li su svi potrebni podaci ispravni pre ažuriranja
-        if (updatedPost.getImageUrl() == null || updatedPost.getImageUrl().isEmpty()) {
+        if (postData.getImageUrl() == null || postData.getImageUrl().isEmpty()) {
             throw new IllegalArgumentException("Image URL must not be null or empty.");
         }
-        if (updatedPost.getDescription() == null) {
+        if (postData.getDescription() == null) {
             throw new IllegalArgumentException("Description must not be null.");
         }
 
-        // Ažuriraj atribute postojeće objave
-        existingPost.setImageUrl(updatedPost.getImageUrl());
-        existingPost.setDescription(updatedPost.getDescription());
+        original.setImageUrl(postData.getImageUrl());
+        original.setDescription(postData.getDescription());
 
-        // Sačuvaj ažuriranu objavu u bazi
-        return postRepository.save(existingPost);
-    }
-    public void delete(Long id) {
-        postRepository.deleteById(id); // Ova metoda ne treba da vraća ništa
-    }
-    @Autowired
-    private UserRepository registeredUserRepository; // Dodajte ovo
-
-    public List<Post> findByUserId(Long userId) {
-        User user = registeredUserRepository.findById(userId)
-                .orElse(null); // Pronađite korisnika po ID-ju
-
-        if (user != null) {
-            return postRepository.findByUser(user); // Koristite korisnika da dobijete postove
-        }
-        return Collections.emptyList(); // Vratite praznu listu ako korisnik nije pronađen
+        return postRepo.save(original);
     }
 
-    public List<Post> getPostsByUsername(String username) {
-        // Pretpostavljam da postoji metoda koja povlači postove na osnovu username-a
-        return postRepository.findByUserUsername(username);
+    public List<Post> getPostsByUserId(Long userId) {
+        Optional<User> userOpt = userRepo.findById(userId);
+        return userOpt.map(postRepo::findByUser).orElse(Collections.emptyList());
     }
 
-
-
-
-
+    public List<Post> fetchByUsername(String username) {
+        return postRepo.findByUserUsername(username);
+    }
 }

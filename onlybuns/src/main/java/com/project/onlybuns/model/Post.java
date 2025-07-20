@@ -1,30 +1,12 @@
 package com.project.onlybuns.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import org.springframework.cglib.core.Local;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Formatter;
 
 @Entity
 @Table(name = "posts")
@@ -35,91 +17,45 @@ public class Post {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String imageUrl;
+    private String mediaPath;
 
-    @Column(nullable = true)
-    private String description;
+    @Column(columnDefinition = "TEXT")
+    private String caption;
 
     @Column(name = "likes_count")
-    private Integer likesCount = 0;
+    private Integer likeCounter = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference(value = "post-user")
-    private User user;
-
-   // @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-   // private List<Like> likes = new ArrayList<>();
+    private User creator;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "post-comments")
-    private List<Comment> comments = new ArrayList<>();
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdTime;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdTime = LocalDateTime.now();
-    }
-
-    // Metode za brojanje lajkova i komentara
-   /* public int getLikesCount() {
-        return likesCount.size();
-    }*/
-
-
-    @Column(nullable = true)
-    private Double latitude;
-
-    @Column(nullable = true)
-    private Double longitude;
-
-    @Column(nullable = true, columnDefinition = "TEXT")
-    private String location;
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    private List<Comment> feedbackList = new ArrayList<>();
 
     @Lob
-    private byte[] image;
+    private byte[] imageData;
 
-    // Getteri i setteri za image
-    public byte[] getImage() {
-        return image;
+    @Column(nullable = true)
+    private Double lat;
+
+    @Column(nullable = true)
+    private Double lng;
+
+    @Column(columnDefinition = "TEXT")
+    private String geoLabel;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime creationTime;
+
+    @PrePersist
+    protected void markCreationTime() {
+        this.creationTime = LocalDateTime.now();
     }
 
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
+    // --- Getteri i setteri ---
 
-
-    public int getCommentsCount() {
-        return comments.size();
-    }
-
-    // Getteri i setteri
     public Long getId() {
         return id;
     }
@@ -128,59 +64,87 @@ public class Post {
         this.id = id;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getMediaPath() {
+        return mediaPath;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setMediaPath(String mediaPath) {
+        this.mediaPath = mediaPath;
     }
 
-    public String getDescription() {
-        return description;
+    public String getCaption() {
+        return caption;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setCaption(String caption) {
+        this.caption = caption;
     }
 
-    public User getUser() {
-        return user;
+    public Integer getLikeCounter() {
+        return likeCounter;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setLikeCounter(Integer likeCounter) {
+        this.likeCounter = likeCounter;
     }
 
-   /* public List<Like> getLikes() {
-        return likes;
+    public User getCreator() {
+        return creator;
     }
 
-    public void setLikes(List<Like> likes) {
-        this.likes = likes;
-    }*/
-
-    public Integer getLikesCount() {
-        return likesCount;
+    public void setCreator(User creator) {
+        this.creator = creator;
     }
 
-    public void setLikesCount(Integer postsCount) {
-        this.likesCount = postsCount;
+    public List<Comment> getFeedbackList() {
+        return feedbackList;
     }
 
-    public List<Comment> getComments() {
-        return comments;
+    public void setFeedbackList(List<Comment> feedbackList) {
+        this.feedbackList = feedbackList;
     }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
+    public byte[] getImageData() {
+        return imageData;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdTime;
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdTime = createdAt;
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
+    }
+
+    public String getGeoLabel() {
+        return geoLabel;
+    }
+
+    public void setGeoLabel(String geoLabel) {
+        this.geoLabel = geoLabel;
+    }
+
+    public LocalDateTime getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public int getFeedbackCount() {
+        return feedbackList.size();
     }
 }

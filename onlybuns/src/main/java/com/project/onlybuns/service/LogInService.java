@@ -6,72 +6,39 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Service
-
 public class LogInService {
 
-    // Maksimalan broj pokušaja
-    private final int MAX_ATTEMPTS = 5;
+    private static final int MAX_RETRIES = 5;
+    private static final long COOLDOWN_MINUTES = 1;
 
-    // Vreme nakon kog se broj pokušaja resetuje (1 minuta)
-    private final long ATTEMPT_RESET_TIME = 1; // u minutama
+    private final ConcurrentHashMap<String, AttemptData> ipTracker = new ConcurrentHashMap<>();
 
-    // Mapa koja čuva informacije o pokušajima prijave po IP adresama
-    private ConcurrentHashMap<String, LoginAttempt> attemptsCache = new ConcurrentHashMap<>();
+    public boolean isRateLimited(String ip) {
+        AttemptData data = ipTracker.get(ip);
+        if (data == null) return false;
 
-    // Metod za proveru da li je IP blokiran zbog previše pokušaja
-    public boolean isBlocked(String ip) {
-        LoginAttempt attempt = attemptsCache.get(ip);
-
-        if (attempt == null) {
-            return false;  // Ako ne postoji zapis o IP adresi, znači nije blokiran
-        }
-
-        // Proveravamo da li je prošlo više od definisanog vremena (1 minut)
-        if (System.currentTimeMillis() - attempt.getLastAttempt() > TimeUnit.MINUTES.toMillis(ATTEMPT_RESET_TIME)) {
-            resetAttempts(ip);  // Ako je prošlo više vremena, resetujemo pokušaje
+        long now = System.currentTimeMillis();
+        if (now - data.lastAttemptTime > TimeUnit.MINUTES.toMillis(COOLDOWN_MINUTES)) {
+            clearAttempts(ip);
             return false;
         }
 
-        // Ako je broj pokušaja veći ili jednak dozvoljenom broju, blokiraj prijavu
-        return attempt.getAttempts() >= MAX_ATTEMPTS;
+        return data.failedAttempts >= MAX_RETRIES;
     }
 
-    // Metod za inkrementiranje broja pokušaja prijave za IP adresu
-    public void incrementAttempts(String ip) {
-        LoginAttempt attempt = attemptsCache.getOrDefault(ip, new LoginAttempt(ip));
-        attempt.incrementAttempts();
-        attemptsCache.put(ip, attempt);
+    public void recordFailure(String ip) {
+        AttemptData data = ipTracker.getOrDefault(ip, new AttemptData());
+        data.failedAttempts++;
+        data.lastAttemptTime = System.currentTimeMillis();
+        ipTracker.put(ip, data);
     }
 
-    // Metod za resetovanje broja pokušaja (poziva se nakon uspešne prijave)
-    public void resetAttempts(String ip) {
-        attemptsCache.remove(ip);  // Uklonimo zapis o IP adresi, čime se resetuju pokušaji
+    public void clearAttempts(String ip) {
+        ipTracker.remove(ip);
     }
 
-    // Interna klasa koja predstavlja podatke o pokušajima prijave za određenu IP adresu
-    private static class LoginAttempt {
-        private String ip;
-        private int attempts;
-        private long lastAttempt;
-
-        public LoginAttempt(String ip) {
-            this.ip = ip;
-            this.attempts = 0;
-            this.lastAttempt = System.currentTimeMillis();
-        }
-
-        // Metod za inkrementiranje broja pokušaja
-        public void incrementAttempts() {
-            attempts++;
-            lastAttempt = System.currentTimeMillis();  // Ažuriramo vreme poslednjeg pokušaja
-        }
-
-        public int getAttempts() {
-            return attempts;
-        }
-
-        public long getLastAttempt() {
-            return lastAttempt;
-        }
+    private static class AttemptData {
+        int failedAttempts = 0;
+        long lastAttemptTime = System.currentTimeMillis();
     }
 }

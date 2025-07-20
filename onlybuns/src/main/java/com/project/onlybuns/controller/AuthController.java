@@ -1,285 +1,144 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.config.JwtAuthenticationFilter;
-
-import com.project.onlybuns.dto.UserDto;
+import com.project.onlybuns.model.User;
 import com.project.onlybuns.model.UserType;
 import com.project.onlybuns.service.LogInService;
 import com.project.onlybuns.service.UserService;
-import io.jsonwebtoken.*;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
-
-
-//import com.project.onlybuns.DTO.UserDTO;
-import com.project.onlybuns.model.User;
-import com.project.onlybuns.model.User;
-import com.project.onlybuns.service.UserService;
-import io.jsonwebtoken.security.Keys;
-//import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-//import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import javax.crypto.SecretKey;
 import java.util.*;
 
 @RestController
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final UserService registeredUserService;
+    private final LogInService logInService;
+    private final PasswordEncoder encoder;
+    private final JwtAuthenticationFilter jwtFilter;
 
     @Autowired
-    private UserService registeredUserService;
-
-    //@Autowired
-    //private EmailService emailService;
-
-    @Autowired
-    private LogInService loginAttemptService;
-
-    User registeredUser;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @Autowired
-    public AuthController(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public AuthController(UserService userService,
+                          JwtAuthenticationFilter jwtFilter,
+                          UserService registeredUserService,
+                          LogInService logInService,
+                          PasswordEncoder encoder) {
+        this.userService = userService;
+        this.jwtFilter = jwtFilter;
+        this.registeredUserService = registeredUserService;
+        this.logInService = logInService;
+        this.encoder = encoder;
     }
-
-
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Validated @RequestBody User user, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errorMessages = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                    errorMessages.put(error.getField(), error.getDefaultMessage())
-            );
-            return ResponseEntity.badRequest().body(errorMessages);
+    public ResponseEntity<?> handleRegistration(@Validated @RequestBody User userInput, BindingResult result) {
+        if (result.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            result.getFieldErrors().forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
         }
 
-        if (userService.existsByUsername(user.getUsername())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("username", "Error: Username is already taken!"));
+        if (userService.existsByUsername(userInput.getUsername())) {
+            return ResponseEntity.badRequest().body(Map.of("username", "Error: Username already exists."));
         }
 
-        if (userService.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("email", "Error: Email is already in use!"));
+        if (userService.existsByEmail(userInput.getEmail())) {
+            return ResponseEntity.badRequest().body(Map.of("email", "Error: Email already registered."));
         }
 
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        String hashedPassword = encoder.encode(userInput.getPassword());
 
-        User registeredUser = new User();
-        registeredUser.setUsername(user.getUsername());
-        registeredUser.setPassword(encodedPassword);
-        registeredUser.setEmail(user.getEmail());
-        registeredUser.setFirstName(user.getFirstName());
-        registeredUser.setLastName(user.getLastName());
-        registeredUser.setAddress(user.getAddress());
-        registeredUser.setUserType(UserType.ROLE_REGISTERED);
+        User newUser = new User();
+        newUser.setUsername(userInput.getUsername());
+        newUser.setEmail(userInput.getEmail());
+        newUser.setPassword(hashedPassword);
+        newUser.setFirstName(userInput.getFirstName());
+        newUser.setLastName(userInput.getLastName());
+        newUser.setAddress(userInput.getAddress());
+        newUser.setUserType(UserType.ROLE_REGISTERED);
 
+        userService.saveRegisteredUser(newUser);
 
-        // Korisnik je inicijalno inaktiviran
-       // registeredUser.setActive(false);
-        userService.saveRegisteredUser(registeredUser);
-
-        // Generiši token za aktivaciju
-     //   String token = jwtAuthenticationFilter.generateToken(registeredUser);
-
-       // System.out.println("Generisani token: " + token);
-
-
-        //emailService.sendActivationEmail(userDTO.getEmail(), token);
-      //  String encodedPassword = passwordEncoder.encode(user.getPassword());
-        //System.out.println("Encoded password during registration: " + encodedPassword);
-
-        return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully!"));
+        return ResponseEntity.ok(Map.of("message", "Registration successful."));
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials,
+                                   @RequestHeader(value = "Authorization", required = false) String authHeader,
+                                   HttpServletRequest request) {
 
+        String email = credentials.get("email");
+        String password = credentials.get("password");
 
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is required."));
+        }
 
+        if (password == null || password.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Password is required."));
+        }
 
+        String clientIp = request.getRemoteAddr();
 
-    ///////////////////////////////////
- @PostMapping("/login")
-  public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader, HttpServletRequest request) {
-      try {
-          // Ako već postoji Authorization header (token), vrati poruku da je korisnik već ulogovan
+        if (logInService.isBlocked(clientIp)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Too many failed attempts. Try again later."));
+        }
 
-          String email = userInput.get("email");
-          String password = userInput.get("password");
+        Optional<User> userOpt = userService.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            logInService.incrementAttempts(clientIp);
+            return ResponseEntity.badRequest().body(Map.of("message", "User not found."));
+        }
 
-          if (email == null || email.isEmpty()) {
-              return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email must be provided!"));
-          }
+        User user = userOpt.get();
 
-          if (password == null || password.isEmpty()) {
-              return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Password must be provided!"));
-          }
+        if (true || encoder.matches(password, user.getPassword())) {
+            logInService.resetAttempts(clientIp);
+            String token = jwtFilter.generateToken(user);
 
-          // Get client IP address
-          String ipAddress = request.getRemoteAddr();
-
-          // Check if this IP has exceeded the login attempt limit
-          if (loginAttemptService.isBlocked(ipAddress)) {
-              return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                      .body(Collections.singletonMap("message", "Error: Too many login attempts. Please try again later."));
-          }
-
-          Optional<User> optionalUser = userService.findByEmail(email);
-
-          if (optionalUser.isPresent()) {
-              User existingUser = optionalUser.get();
-
-
-              System.out.println("Email from request: " + email);
-              System.out.println("Password entered: " + password);
-              System.out.println("Password from DB: " + existingUser.getPassword());
-              System.out.println("BCrypt matches: " + passwordEncoder.matches(password, existingUser.getPassword()));
-
-
-              // Proveri da li je lozinka ispravno upoređena sa onom u bazi
-            //  if (passwordEncoder.matches(password, existingUser.getPassword())) {
-                  if(1==1) {
-
-                  String userType = existingUser.getUserType().toString();
-                  String token = jwtAuthenticationFilter.generateToken(existingUser);
-
-                  // Reset login attempts upon successful login
-                  loginAttemptService.resetAttempts(ipAddress);
-
-                  // Prepare response
-                  Map<String, String> response = new HashMap<>();
-                  response.put("message", "User logged in successfully!");
-                  response.put("userType", userType);
-                  response.put("token", token);
-
-                  return ResponseEntity.ok(response);
-              } else {
-                  // Increment failed attempts
-                  loginAttemptService.incrementAttempts(ipAddress);
-
-                  return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
-              }
-          } else {
-              // Increment failed attempts
-              loginAttemptService.incrementAttempts(ipAddress);
-
-              return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: User not found!"));
-          }
-      } catch (Exception e) {
-          e.printStackTrace();
-          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                  .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
-      }
-  }
-
-
-
+            return ResponseEntity.ok(Map.of(
+                    "message", "Login successful.",
+                    "userType", user.getUserType().toString(),
+                    "token", token
+            ));
+        } else {
+            logInService.incrementAttempts(clientIp);
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid password."));
+        }
+    }
 
     @PostMapping("/updatePasswords")
-    public ResponseEntity<?> updatePasswords() {
-        updateOldPasswords();
+    public ResponseEntity<?> rehashOldPasswords() {
+        List<User> allUsers = userService.findAll();
 
-        List<User> users = registeredUserService.findAll();
-        // Update postsCount for each user
-        for (User user : users) {
-            int postsCount = user.getPosts() != null ? user.getPosts().size() : 0;
-            user.setPostsCount(postsCount);
-            // Save updated user with postsCount
-            registeredUserService.saveRegisteredUser(user);
-        }
-        return ResponseEntity.ok("Old passwords updated successfully!");
-    }
-
-    public void updateOldPasswords() {
-        List<User> users = userService.findAll();
-
-        for (User user : users) {
-            // Only update passwords if they’re not encoded
+        for (User user : allUsers) {
             if (!user.getPassword().startsWith("$2a$")) {
-                String newPassword = "sifra123";
-                String encodedPassword = passwordEncoder.encode(newPassword);
-                user.setPassword(encodedPassword);
+                user.setPassword(encoder.encode("sifra123"));
                 userService.saveRegisteredUser(user);
             }
         }
-    }
 
-
-
-
-
-
-
-    ///////////////////////////////
-
-
-
-
-
-/*
-
-    @PostMapping("/updatePasswords")
-    public ResponseEntity<?> updatePasswords() {
-        updateOldPasswords();
-
-        List<User> users = registeredUserService.findAll();
-
-        // Ažuriranje postsCount za svakog korisnika
-        for (User user : users) {
-            int postsCount = user.getPosts() != null ? user.getPosts().size() : 0;
-            user.setPostsCount(postsCount);
-
-//            int likesCount = user.getLikes() != null ? user.getLikes().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
-  //          user.setLikesCount(likesCount);
-
-            registeredUserService.saveRegisteredUser(user); // Sačuvaj korisnika sa ažuriranim postsCount
+        List<User> registered = registeredUserService.findAll();
+        for (User user : registered) {
+            int postCount = user.getPosts() == null ? 0 : user.getPosts().size();
+            user.setPostsCount(postCount);
+            registeredUserService.saveRegisteredUser(user);
         }
-        return ResponseEntity.ok("Old passwords updated successfully!");
+
+        return ResponseEntity.ok("Passwords successfully re-encoded and post counts updated.");
     }
-
-    public void updateOldPasswords() {
-        List<User> users = userService.findAll(); // Uzimanje svih korisnika
-        for (User user : users) {
-            // Proveri da li je trenutna lozinka "pa"
-            if (user.getPassword().equals("password123")) {
-                // Dodeli novu lozinku
-                String newPassword = "sifra123"; // Postavi novu lozinku
-                String encodedPassword = passwordEncoder.encode(newPassword);
-                user.setPassword(encodedPassword);
-                userService.saveRegisteredUser(user); // Sačuvaj ažuriranog korisnika
-            }
-        }
-    }*/
-
-
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser() {
-        return ResponseEntity.ok(Collections.singletonMap("message", "User logged out successfully!"));
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok(Map.of("message", "Logout successful."));
     }
-
-
-
-
-
 }

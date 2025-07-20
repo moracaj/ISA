@@ -5,31 +5,37 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.UUID;
 
 @Service
 public class ImageUploadService {
-    private static final String UPLOAD_DIR = "src/main/resources/static.images";
 
-    public String uploadImage(MultipartFile file) throws IOException {
-        String fileType = file.getContentType();
-        if (fileType == null || !fileType.startsWith("image")) {
-            throw new IllegalArgumentException("File is not an image");
+    private static final String TARGET_DIRECTORY = "src/main/resources/static.images";
+
+    public String storeImage(MultipartFile file) throws IOException {
+        if (!isImageFile(file)) {
+            throw new IllegalArgumentException("Uploaded file must be an image.");
         }
 
-        String fileName = file.getOriginalFilename();
-        Path uploadPath = Paths.get(UPLOAD_DIR, fileName);
+        ensureDirectoryExists(TARGET_DIRECTORY);
 
-        File directory = new File(UPLOAD_DIR);
-        if (!directory.exists() && !directory.mkdirs()) {
-            throw new IOException("Failed to create upload directory");
+        String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path destination = Paths.get(TARGET_DIRECTORY, uniqueName);
+        Files.copy(file.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+        return "/images/" + uniqueName;
+    }
+
+    private boolean isImageFile(MultipartFile file) {
+        String type = file.getContentType();
+        return type != null && type.startsWith("image");
+    }
+
+    private void ensureDirectoryExists(String dirPath) throws IOException {
+        File folder = new File(dirPath);
+        if (!folder.exists() && !folder.mkdirs()) {
+            throw new IOException("Could not create target directory: " + dirPath);
         }
-
-        Files.copy(file.getInputStream(), uploadPath);
-
-        return "/images/" + fileName;
     }
 }

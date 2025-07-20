@@ -1,4 +1,5 @@
 package com.project.onlybuns.service;
+
 import com.project.onlybuns.model.Comment;
 import com.project.onlybuns.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,29 +9,28 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-
 public class CommentService {
 
-    private final CommentRepository repository;
+    private final CommentRepository commentRepo;
 
     @Autowired
-    public CommentService(CommentRepository repository) {
-        this.repository = repository;
+    public CommentService(CommentRepository commentRepo) {
+        this.commentRepo = commentRepo;
     }
 
-    public List<Comment> getAllComments() {
-        return repository.findAll();
+    public List<Comment> fetchAllComments() {
+        return commentRepo.findAll();
     }
 
-    public Optional<Comment> getCommentById(Long id) {
-        return repository.findById(id);
+    public Optional<Comment> findCommentById(Long id) {
+        return commentRepo.findById(id);
     }
 
-    public Comment createOrUpdateComment(Comment comment) {
-        return repository.save(comment);
+    public Comment saveComment(Comment comment) {
+        return commentRepo.save(comment);
     }
 
-    public void removeComment(Long id) {
-        repository.deleteById(id);
+    public void deleteComment(Long id) {
+        commentRepo.deleteById(id);
     }
 }

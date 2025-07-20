@@ -1,33 +1,23 @@
 package com.project.onlybuns.controller;
 
-import com.project.onlybuns.config.JwtAuthenticationFilter;
-
 import com.project.onlybuns.dto.PostDto;
-import com.project.onlybuns.service.ImageUploadService;
-import com.project.onlybuns.model.*;
-import com.project.onlybuns.service.PostService;
+import com.project.onlybuns.model.Comment;
+import com.project.onlybuns.model.Post;
+import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.CommentService;
+import com.project.onlybuns.service.ImageUploadService;
+import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.UserService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,255 +26,157 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
-@RequestMapping("/posts") // Base path for post-related endpoints
-public class PostController {
+@RequestMapping("/content")
+public class ContentController {
 
     private final PostService postService;
     private final CommentService commentService;
-
-
     private final UserService userService;
-
     private final ImageUploadService imageUploadService;
 
     @Autowired
-    public PostController(PostService postService, CommentService commentService, UserService userService, ImageUploadService imageUploadService) {
+    public ContentController(PostService postService, CommentService commentService,
+                             UserService userService, ImageUploadService imageUploadService) {
         this.postService = postService;
         this.commentService = commentService;
         this.userService = userService;
         this.imageUploadService = imageUploadService;
     }
 
-
-    public String getUsernameFromToken() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            return authentication.getName(); // Dobijamo korisničko ime iz JWT tokena
-        }
-        return null;
+    private String getCurrentUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return (auth != null) ? auth.getName() : null;
     }
 
-//    @DeleteMapping("/delete/{id}")
-//    @PreAuthorize("hasRole('REGISTERED')")  // Ova anotacija osigurava da samo REGISTERED korisnici mogu obrisati objavu
-//    public ResponseEntity<String> deletePost(@PathVariable Long id) {
-//        // Dobijanje korisničkog imena iz tokena
-//        String username = getUsernameFromToken();
-//
-//        if (username == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated"); // 401 if user is not authenticated
-//        }
-//
-//        // Pronađi post po ID-u
-//        Optional<Post> optionalPost = postService.findById(id);
-//
-//        if (optionalPost.isPresent()) {
-//            Post post = optionalPost.get();
-//
-//            // Proveri da li je korisnik autor objave
-//            if (post.getUser().getUsername().equals(username)) {
-//                postService.delete(id); // Obriši post
-//                return ResponseEntity.noContent().build(); // 204 if post was deleted successfully
-//            } else {
-//                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot delete it"); // 403 if user is not the author
-//            }
-//        } else {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found"); // 404 if post doesn't exist
-//        }
-//    }
-
-
-    @GetMapping("/my-posts")
+    // POST kreiranje objave sa slikom
+    @PostMapping("/create")
     @PreAuthorize("hasRole('REGISTERED')")
-    public List<Map<String, Object>> getPostsForLoggedInUser() {
-        // Dobijanje trenutnog korisnika iz SecurityContext-a
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<Post> publishNewPost(
+            @RequestParam("description") String description,
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude,
+            @RequestParam("location") String location,
+            @RequestPart("imageFile") MultipartFile imageFile) {
 
-        List<Post> posts = postService.getPostsByUsername(username);
-        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
+        String username = getCurrentUsername();
+        Optional<User> optionalUser = userService.findByUsername(username);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        for (Post post : posts) {
+        String uploadedImagePath;
+        try {
+            uploadedImagePath = imageUploadService.uploadImage(imageFile);
+        } catch (IOException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        Post newPost = new Post();
+        newPost.setDescription(description);
+        newPost.setImageUrl(uploadedImagePath);
+        newPost.setUser(optionalUser.get());
+        newPost.setCreatedAt(LocalDateTime.now());
+        newPost.setLatitude(latitude);
+        newPost.setLongitude(longitude);
+        newPost.setLocation(location);
+
+        Post saved = postService.save(newPost);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    // GET svi postovi + komentari
+    @GetMapping("/all")
+    public List<Map<String, Object>> fetchAllPosts() {
+        List<Post> allPosts = postService.findAll();
+        List<Map<String, Object>> response = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+        for (Post post : allPosts) {
             Map<String, Object> postData = new HashMap<>();
-
-            // Dodajemo podatke o postu
             postData.put("id", post.getId());
             postData.put("imageUrl", post.getImageUrl());
             postData.put("description", post.getDescription());
-            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
+            postData.put("username", Optional.ofNullable(post.getUser()).map(User::getUsername).orElse("Unknown"));
             postData.put("countLikes", post.getLikesCount());
-            // Dodajemo listu komentara
-            List<Map<String, Object>> commentsData = new ArrayList<>();
-            for (Comment comment : post.getComments()) {
-                Map<String, Object> commentData = new HashMap<>();
-                commentData.put("id", comment.getId());
-                commentData.put("content", comment.getContent());
-                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime komentara
-                commentsData.add(commentData);
-            }
-            postData.put("comments", commentsData);
+            postData.put("createdAt", post.getCreatedAt() != null ? post.getCreatedAt().format(formatter) : "N/A");
 
-            // Dodajemo post sa komentarima
-            postsWithUsernamesAndComments.add(postData);
+            List<Map<String, Object>> commentDataList = new ArrayList<>();
+            for (Comment c : post.getComments()) {
+                Map<String, Object> cMap = new HashMap<>();
+                cMap.put("id", c.getId());
+                cMap.put("content", c.getContent());
+                cMap.put("username", Optional.ofNullable(c.getUser()).map(User::getUsername).orElse("Anonymous"));
+                cMap.put("createdAt", c.getCreatedAt() != null ? c.getCreatedAt().format(formatter) : "N/A");
+                commentDataList.add(cMap);
+            }
+
+            postData.put("comments", commentDataList);
+            response.add(postData);
         }
 
-        return postsWithUsernamesAndComments;
+        return response;
     }
 
+    // GET - Svi postovi samo od korisnika
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public List<Map<String, Object>> getMyPosts() {
+        String username = getCurrentUsername();
+        List<Post> userPosts = postService.getPostsByUsername(username);
+        List<Map<String, Object>> response = new ArrayList<>();
 
+        for (Post post : userPosts) {
+            Map<String, Object> postData = new HashMap<>();
+            postData.put("id", post.getId());
+            postData.put("imageUrl", post.getImageUrl());
+            postData.put("description", post.getDescription());
+            postData.put("username", Optional.ofNullable(post.getUser()).map(User::getUsername).orElse("Unknown"));
+            postData.put("countLikes", post.getLikesCount());
 
+            List<Map<String, Object>> commentDataList = new ArrayList<>();
+            for (Comment c : post.getComments()) {
+                Map<String, Object> cMap = new HashMap<>();
+                cMap.put("id", c.getId());
+                cMap.put("content", c.getContent());
+                cMap.put("username", Optional.ofNullable(c.getUser()).map(User::getUsername).orElse("Anonymous"));
+                commentDataList.add(cMap);
+            }
 
+            postData.put("comments", commentDataList);
+            response.add(postData);
+        }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
-        return postService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return response;
     }
 
-    @GetMapping("/images/{imageName}")
-    public ResponseEntity<Resource> getImage(@PathVariable String imageName) {
+    // GET - Preuzimanje slike
+    @GetMapping("/images/{filename}")
+    public ResponseEntity<Resource> serveImage(@PathVariable String filename) {
         try {
-            Path imagePath = Paths.get("src/main/resources/static.images/" + imageName);
-            Resource resource = new UrlResource(imagePath.toUri());
+            Path filePath = Paths.get("src/main/resources/static.images/" + filename);
+            Resource fileResource = new UrlResource(filePath.toUri());
 
-            if (resource.exists() || resource.isReadable()) {
+            if (fileResource.exists() && fileResource.isReadable()) {
                 return ResponseEntity.ok()
                         .contentType(MediaType.IMAGE_JPEG)
-                        .body(resource);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+                        .body(fileResource);
             }
+            return ResponseEntity.notFound().build();
         } catch (MalformedURLException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-
-//    @PostMapping("/create")
-//    @PreAuthorize("hasRole('REGISTERED')")
-//    public ResponseEntity<Post> createPost(@RequestBody PostDto  postDto) {
-//        // Dobijanje trenutnog korisnika iz SecurityContext-a
-//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//        User loggedUser = userService.findByUsername(username).orElse(null);
-//        System.out.println("Korisnik: " + loggedUser.getEmail());
-//
-//
-//        if (loggedUser == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-//        }
-//
-//        // Kreiraj novi Post objekat i postavi polja iz DTO-a
-//        Post post1 = new Post();
-//        post1.setDescription(postDto.getDescription());
-//        post1.setImageUrl(postDto.getImageUrl());
-//        post1.setUser(loggedUser);
-//        post1.setCreatedAt(LocalDateTime.now()); // Automatsko postavljanje trenutnog vremena
-//        System.out.println("Opis posta: " + post1.getDescription());
-//        // Spasi post u bazu
-//        Post savedPost = postService.save(post1);
-//
-//        return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
-//   }
-@PostMapping("/create")
-@PreAuthorize("hasRole('REGISTERED')")
-public ResponseEntity<Post> createPost(
-        @RequestParam("description") String description,
-        @RequestParam("latitude") Double latitude,
-        @RequestParam("longitude") Double longitude,
-        @RequestParam("location") String location,
-        @RequestPart("imageFile") MultipartFile imageFile) {
-
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    User loggedUser = userService.findByUsername(username).orElse(null);
-
-    if (loggedUser == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    // GET - Jedan post po ID-u
+    @GetMapping("/{postId}")
+    public ResponseEntity<Post> getPostDetails(@PathVariable Long postId) {
+        return postService.findById(postId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
-
-    String imageUrl;
-    try {
-        imageUrl = imageUploadService.uploadImage(imageFile);
-    } catch (IOException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
-
-    Post post = new Post();
-    post.setDescription(description);
-    post.setImageUrl(imageUrl);
-    post.setUser(loggedUser);
-    post.setCreatedAt(LocalDateTime.now());
-    post.setLatitude(latitude);
-    post.setLongitude(longitude);
-    post.setLocation(location);
-
-    Post savedPost = postService.save(post);
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
-}
-
-
-
-
-
-
-
-    @GetMapping("/allPosts")
-    public List<Map<String, Object>> getAllPosts() {
-        List<Post> posts = postService.findAll();
-        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // Format za datum i vreme
-
-        for (Post post : posts) {
-            Map<String, Object> postData = new HashMap<>();
-
-            // Dodajemo podatke o postu
-            postData.put("id", post.getId());
-            postData.put("imageUrl", post.getImageUrl());
-            postData.put("description", post.getDescription());
-            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown");
-            postData.put("countLikes", post.getLikesCount());
-            // Formatiramo datum i vreme za post
-            String formattedDate = post.getCreatedAt() != null ? post.getCreatedAt().format(formatter) : "Unknown date";
-            postData.put("createdAt", formattedDate); // Dodajemo datum i vreme
-
-            // Dodajemo listu komentara
-            List<Map<String, Object>> commentsData = new ArrayList<>();
-            for (Comment comment : post.getComments()) {
-                Map<String, Object> commentData = new HashMap<>();
-                commentData.put("id", comment.getId());
-                commentData.put("content", comment.getContent());
-                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown");
-
-                // Formatiramo datum i vreme za komentar
-                String formattedCommentDate = comment.getCreatedAt() != null ? comment.getCreatedAt().format(formatter) : "Unknown date";
-                commentData.put("createdAt", formattedCommentDate); // Dodajemo datum i vreme za komentar
-
-                commentsData.add(commentData);
-            }
-            postData.put("comments", commentsData);
-
-            // Dodajemo post sa komentarima
-            postsWithUsernamesAndComments.add(postData);
-        }
-
-        return postsWithUsernamesAndComments;
-    }
-
-
-
-
-
-    /*@PostMapping("/{id}/comments")
-    public ResponseEntity<Comment>addComment(@PathVariable Long id, @RequestBody Comment comment, @AuthenticationPrincipal User user) {
-        comment.setUser(user);
-        comment.setPost(postService.findById(id).orElse(null)); // Setuj post za komentar
-        Comment savedComment = commentService.save(comment); // Implementiraj ovu metodu u servisu
-        return ResponseEntity.ok(savedComment);
-    }*/
 }

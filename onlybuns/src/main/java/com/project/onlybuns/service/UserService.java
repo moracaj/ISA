@@ -1,9 +1,6 @@
 package com.project.onlybuns.service;
 
-
-
 import com.project.onlybuns.model.User;
-
 import com.project.onlybuns.model.UserType;
 import com.project.onlybuns.repository.UserRepository;
 
@@ -15,115 +12,91 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    @Autowired
-    public PasswordEncoder passwordEncoder;  //ne znam sta ce mi ovo
+    private final UserRepository userRepo;
+    private final PasswordEncoder encoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public UserService(UserRepository userRepo, PasswordEncoder encoder) {
+        this.userRepo = userRepo;
+        this.encoder = encoder;
     }
 
     @PostConstruct
-    public void init() {
-        updatePasswords();
-    }
-
-    public List<User> searchUsers(String name, String surname, String email) {
-        return userRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(name, surname, email);
-    }
-
-    public List<User> findUsersByPostsCount(int min, int max) {
-        return userRepository.findByPostsCountBetween(min, max);
-    }
-
-    public void updatePasswords() {
-        List<User> users = userRepository.findAll();
-        for (User user : users) {
+    public void secureAllPasswords() {
+        List<User> allUsers = userRepo.findAll();
+        for (User user : allUsers) {
             if (!user.getPassword().startsWith("$2a$")) {
-                String encodedPassword = passwordEncoder.encode(user.getPassword());
-                user.setPassword(encodedPassword);
-                userRepository.save(user);
+                user.setPassword(encoder.encode(user.getPassword()));
+                userRepo.save(user);
             }
         }
     }
 
-    public void registerUser(User user) {
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-        userRepository.save(user);
+    public void createUser(User user) {
+        user.setPassword(encoder.encode(user.getPassword()));
+        userRepo.save(user);
     }
 
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<User> getAll() {
+        return userRepo.findAll();
     }
 
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+    public void removeUserById(Long userId) {
+        userRepo.deleteById(userId);
     }
 
-    public boolean existsByUsername(String username) {
-        return userRepository.existsByUsername(username);
+    public boolean usernameTaken(String username) {
+        return userRepo.existsByUsername(username);
     }
 
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+    public boolean emailExists(String email) {
+        return userRepo.existsByEmail(email);
     }
 
-    public List<User> findAllRegisteredUsers() {
-        return userRepository.findByUserType(UserType.ROLE_REGISTERED);
+    public Optional<User> getByUsername(String username) {
+        return userRepo.findByUsername(username);
     }
 
-    // Metoda za dobavljanje svih administratora
-    public List<User> findAllAdministrators() {
-        return userRepository.findByUserType(UserType.ROLE_ADMIN);
+    public Optional<User> getByEmail(String email) {
+        return userRepo.findByEmail(email);
     }
 
-    public Optional<User> findRegisteredUsersByUsername(String username) {
-        return userRepository.findRegisteredUserByUsername(username, UserType.ROLE_REGISTERED);
+    public List<User> filterUsersByPostsRange(int minPosts, int maxPosts) {
+        return userRepo.findByPostsCountBetween(minPosts, maxPosts);
     }
 
-
-
-   /* // Metoda za dobavljanje svih administratora
-    public List<User> findAllAdministratorsById() {
-        return userRepository.findByUserId(UserType.ADMINISTRATOR);
-    }*/
-
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public List<User> searchByNameOrEmail(String first, String last, String email) {
+        return userRepo.findByFirstNameContainingOrLastNameContainingOrEmailContaining(first, last, email);
     }
 
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public List<User> getAllRegistered() {
+        return userRepo.findByUserType(UserType.ROLE_REGISTERED);
     }
 
-    // Funkcija za čuvanje registrovanog korisnika
-    public User saveRegisteredUser(User user) {
+    public List<User> getAllAdmins() {
+        return userRepo.findByUserType(UserType.ROLE_ADMIN);
+    }
+
+    public Optional<User> getRegisteredByUsername(String username) {
+        return userRepo.findRegisteredUserByUsername(username, UserType.ROLE_REGISTERED);
+    }
+
+    public User persistRegistered(User user) {
         user.setUserType(UserType.ROLE_REGISTERED);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));  // Enkoding lozinke
-        return userRepository.save(user);
+        user.setPassword(encoder.encode(user.getPassword()));
+        return userRepo.save(user);
     }
 
-    // Funkcija za čuvanje administratora
-    public User saveAdministrator(User user) {
+    public User persistAdmin(User user) {
         user.setUserType(UserType.ROLE_ADMIN);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));  // Enkoding lozinke
-        return userRepository.save(user);
+        user.setPassword(encoder.encode(user.getPassword()));
+        return userRepo.save(user);
     }
 
-
-    public void saveUser(User user) {
-        userRepository.save(user);
+    public void save(User user) {
+        userRepo.save(user);
     }
-
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-
 }

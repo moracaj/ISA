@@ -1,8 +1,6 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.model.User;
-import com.project.onlybuns.model.User;
-import com.project.onlybuns.repository.UserRepository;
 import com.project.onlybuns.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,43 +10,46 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users") // Osnovna putanja za korisničke operacije
-public class UserController {
+@RequestMapping("/accounts")
+public class AccountController {
 
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public AccountController(UserService userService) {
         this.userService = userService;
     }
 
+    // Dohvatanje svih korisnika
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.findAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<User>> retrieveAllAccounts() {
+        return ResponseEntity.ok(userService.findAllUsers());
     }
 
-    private boolean isAdmin(HttpSession session) {
-        return session.getAttribute("userType") != null && session.getAttribute("userType").equals("ADMIN");
-    }
-
+    // Dodavanje novog korisnika
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.saveRegisteredUser (user);
-        return ResponseEntity.ok(createdUser);
+    public ResponseEntity<User> registerAccount(@RequestBody User userData) {
+        User newUser = userService.saveRegisteredUser(userData);
+        return ResponseEntity.ok(newUser);
     }
-    @PostMapping("/update-passwords")
-    public ResponseEntity<String> updatePasswords() {
+
+    // Masovno ažuriranje lozinki (npr. reset svih lozinki)
+    @PostMapping("/reset-passwords")
+    public ResponseEntity<String> resetAllPasswords() {
         userService.updatePasswords();
-        return ResponseEntity.ok("Passwords updated successfully.");
+        return ResponseEntity.ok("All passwords have been updated.");
     }
 
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    // Brisanje korisnika po ID-u
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> removeAccount(@PathVariable Long userId) {
+        userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 
-
+    // Pomoćna metoda za proveru administratorskih prava
+    private boolean isAdministrator(HttpSession session) {
+        Object role = session.getAttribute("userType");
+        return role != null && role.equals("ADMIN");
+    }
 }

@@ -14,33 +14,27 @@ public class Comment {
     private Long id;
 
     @Column(nullable = false)
-    private String content;
+    private String text;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference(value = "user-comments")  // Sprečava serijalizaciju povezane RegisteredUser
-    private User user; // Povezivanje sa RegisteredUser
+    @JsonBackReference(value = "user-comments")
+    private User author;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    @JsonBackReference(value = "post-comments")// Sprečava serijalizaciju povezane Post
-    private Post post; // Povezivanje sa Post
+    @JsonBackReference(value = "post-comments")
+    private Post associatedPost;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdTime;  // Datum i vreme kada je komentar napravljen
-
-    public LocalDateTime getCreatedAt() {
-        return createdTime;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdTime = createdAt;
-    }
+    private LocalDateTime timestamp;
 
     @PrePersist
-    protected void onCreate() {
-        this.createdTime = LocalDateTime.now();  // Postavljanje trenutnog vremena pre nego što komentar bude sačuvan
+    protected void assignTimestamp() {
+        this.timestamp = LocalDateTime.now();
     }
+
+    // --- Getters and Setters ---
 
     public Long getId() {
         return id;
@@ -50,27 +44,35 @@ public class Comment {
         this.id = id;
     }
 
-    public String getContent() {
-        return content;
+    public String getText() {
+        return text;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setText(String text) {
+        this.text = text;
     }
 
-    public User getUser() {
-        return user;
+    public User getAuthor() {
+        return author;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setAuthor(User author) {
+        this.author = author;
     }
 
-    public Post getPost() {
-        return post;
+    public Post getAssociatedPost() {
+        return associatedPost;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
+    public void setAssociatedPost(Post associatedPost) {
+        this.associatedPost = associatedPost;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -1,95 +1,82 @@
 package com.project.onlybuns.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-//import jakarta.validation.constraints.Email;
-//import jakarta.validation.constraints.NotBlank;
-//import jakarta.validation.constraints.Size;
 
 public class UserDto {
 
-  //  @NotBlank(message = "Username cannot be blank")
-   // @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
-    private String username;
-
-    //@NotBlank(message = "Password cannot be blank")
-    //@Size(min = 6, message = "Password must be at least 6 characters")
-    private String password;
-
-   // @Email(message = "Email should be valid")
-   // @NotBlank(message = "Email cannot be blank")
-    private String email;
+    private String userName;
+    private String passcode;
+    private String emailAddress;
 
     @JsonProperty("first_name")
-    //@NotBlank(message = "First name cannot be blank")
-    private String firstName;
+    private String givenName;
 
     @JsonProperty("last_name")
-    //@NotBlank(message = "Last name cannot be blank")
-    private String lastName;
+    private String familyName;
 
-    private String address;
+    private String residence;
 
-    // No-argument constructor
+    // Default constructor
     public UserDto() {
     }
 
-    // Constructor with parameters
-    public UserDto(String username, String password, String email, String firstName, String lastName, String address) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
+    // All-args constructor
+    public UserDto(String userName, String passcode, String emailAddress, String givenName, String familyName, String residence) {
+        this.userName = userName;
+        this.passcode = passcode;
+        this.emailAddress = emailAddress;
+        this.givenName = givenName;
+        this.familyName = familyName;
+        this.residence = residence;
     }
 
-    // Getters and Setters
-    public String getUsername() {
-        return username;
+    // --- Getters and Setters ---
+
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasscode() {
+        return passcode;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasscode(String passcode) {
+        this.passcode = passcode;
     }
 
-    public String getEmail() {
-        return email;
+    public String getEmailAddress() {
+        return emailAddress;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getGivenName() {
+        return givenName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getFamilyName() {
+        return familyName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setFamilyName(String familyName) {
+        this.familyName = familyName;
     }
 
-    public String getAddress() {
-        return address;
+    public String getResidence() {
+        return residence;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setResidence(String residence) {
+        this.residence = residence;
     }
-
 }
