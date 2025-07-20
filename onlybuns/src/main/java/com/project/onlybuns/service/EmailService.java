@@ -24,7 +24,6 @@ public class EmailService {
     }
 
 
-
     public void sendActivationEmail(String to, String token) throws MessagingException {
         String subject = "Activate your account";
         String confirmationUrl = "http://localhost:8080/activate?token=" + token;

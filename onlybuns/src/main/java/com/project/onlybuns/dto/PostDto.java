@@ -1,16 +1,9 @@
 package com.project.onlybuns.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.project.onlybuns.model.Comment;
-import com.project.onlybuns.model.RegisteredUser;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class PostDto {
 
@@ -20,7 +13,7 @@ public class PostDto {
     private Double latitude;
     private Double longitude;
     private String location;
-
+    @JsonIgnore
     private MultipartFile imageFile;
 
     public PostDto() {}

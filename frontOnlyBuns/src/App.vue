@@ -1,39 +1,9 @@
-<!-- <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
-</template>
-
-<script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style> -->
-
-
-
-
 <template>
   <div id="app">
     <HeaderNavigation />
 
     <div v-if="$route.path === '/'">
-      <h1 class="backend-message">{{ message }}</h1>
+      <!-- <h1 class="backend-message">{{ message }}</h1> -->
 
       <!-- Display buttons based on token presence -->
       <div class="button-container" v-if="!isLoggedIn">
@@ -41,75 +11,56 @@ export default {
         <button @click="goToRegister" class="my-button register">Sign in</button>
       </div>
 
+
+
       <div class="button-container" v-else>
+       
         <button @click="logout" class="my-button logout">Log out</button>
+
       </div>
 
-       <!-- <div v-if="errorMessage" class="error-message">
-        <p>{{ errorMessage }}</p>
-      </div>  -->
+      <div v-if="showUsers" class="users-block">
+        <h3>All Users:</h3>
+          <ul>
+            <li v-for="username in users" :key="username">
+              <router-link :to="{ name: 'UserProfile', params: { username } }" class="clickable-username">
+                {{ username }}
+              </router-link>
+            </li>
+          </ul>
+          <button @click="toggleUsersVisibility">Hide Users</button>
+        </div>
+`
 
-      <!-- <div class="posts-container">
+      <div v-if="errorMessage" class="error-message">
+        <p>{{ errorMessage }}</p>
+      </div>
+
+      <div class="posts-container">
         <div v-for="post in posts" :key="post.id" class="post">
           <img :src="post.imageUrl" alt="Post Image" class="post-image" />
 
           <div class="post-description">
             <h3>Description:</h3>
             <p>{{ post.description }}</p>
-            <h3>Likes:</h3>
-            <p>{{ post.countLikes }}</p>
-            <p>Posted by: {{ post.username }}</p>
+            <h3>Likes:4</h3>
+            
+            
+              <p>
+                  Posted by: 
+                  <router-link :to="{ name: 'UserProfile', params: { username: post.username } }">
+                    {{ post.username }}
+                  </router-link>
+              </p>
+              
+
             <p>Created at: {{ formatDate(post.createdAt) }}</p>
           </div>
 
           <h3 class="comments-title">Comments:</h3>
 
           <ul class="comments-list">
-            <li v-for="comment in sortedComments(post.comments)" :key="comment.id" class="comment-item">
-              <strong>{{ comment.username }}:</strong> {{ comment.content }}
-              <p class="comment-time">Commented at: {{ formatDate(comment.createdAt) }}</p>
-            </li>
-          </ul>
-
-           <div class="post-actions">
-            <i class="fas fa-thumbs-up like-icon" @click="likePost(post.id)"></i>
-            <i class="fas fa-comment-alt comment-icon" @click="commentPost(post.id)"></i>
-          </div> 
-        </div>
-      </div> -->
-
-      <div class="posts-container">
-  <div v-for="post in posts" :key="post.id" class="post">
-    <!-- Slika posta -->
-    <img :src="post.imageUrl" alt="Post Image" class="post-image" />
-
-    <!-- Sadržaj posta -->
-    <div class="post-content">
-      <!-- <h2>{{ post.username }}</h2> -->
-      <p>
-         <!-- Posted by:  -->
-        <router-link :to="{ name: 'UserProfile', params: { username: post.username } }">
-         {{ post.username }}
-        </router-link>
-      </p>
-      <p class="post-time">{{ formatDate(post.createdAt) }}</p>
-      <p class="post-description">{{ post.description }}</p>
-
-      <div class="post-stats">
-        <span class="likes">❤️ {{ post.countLikes }} Likes</span>
-        <span class="comments">💬 {{ post.comments.length }} Comments</span>
-      </div>
-
-      <!-- Komentari -->
-      <div class="comments-list">
-        <h3>Comments:</h3>
-        <ul>
-          <!-- <li v-for="comment in sortedComments(post.comments)" :key="comment.id">
-            <p><strong>{{ comment.username }}:</strong> {{ comment.content }}</p>
-            <p class="comment-time">{{ formatDate(comment.createdAt) }}</p>
-          </li> -->
-
-          <li v-for="comment in sortedComments(post.comments)" :key="comment.id" class="comment-item">
+  <li v-for="comment in sortedComments(post.comments)" :key="comment.id" class="comment-item">
     <strong>
       <router-link :to="{ name: 'UserProfile', params: { username: comment.username } }" class="clickable-username">
         {{ comment.username }}
@@ -117,21 +68,25 @@ export default {
     </strong>
     {{ comment.content }}
     <p class="comment-time">Commented at: {{ formatDate(comment.createdAt) }}</p>
-       </li> 
+  </li>
+</ul>
 
+           <div class="post-actions">
+            <button class="custom-action-button" @click="likePost(post.id)">👍 Like</button>
+            <button class="custom-action-button" @click="commentPost(post.id)">💬 Comment</button>
+          </div>
 
+          <!-- <div v-if="isLoggedIn" class="add-comment">
+            <textarea v-model="newCommentContent[post.id]" placeholder="Add a comment..."></textarea>
+            <button @click="addComment(post.id)">→</button>
+          </div> -->
 
-        </ul>
+          <div v-if="errorMessages[post.id]" class="error-message-com">
+            {{ errorMessages[post.id] }}
+          </div>
+
+        </div>
       </div>
-      <div class="post-actions">
-        <button @click="likePost(post.id)" class="action-button like-button">Like</button>
-        <button @click="commentPost(post.id)" class="action-button comment-button">Comment</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-      <!--  //////////////////////////////////////////////////-->
 
       <!-- Modal for login/register alert -->
       <div v-if="showModal" class="modal-overlay">
@@ -161,7 +116,11 @@ export default {
       posts: [],
       errorMessage: '',
       showModal: false,
-      modalMessage: ''
+      modalMessage: '',
+      users: [],  // New array to store usernames
+      showUsers: false,  // Controls visibility of users block
+      newCommentContent: {},
+      errorMessages: {},
     };
   },
   computed: {
@@ -177,20 +136,38 @@ export default {
     goToProfile(username) {
     this.$router.push({ name: 'UserProfile', params: { username } });
   },
-    async fetchPosts() {
-      try {
-        const response = await axios.get('http://localhost:8080/posts/allPosts', {
-          headers: { 'Content-Type': 'application/json' }
-        });
+  
+  async fetchPosts() {
+  try {
+    // Proverava da li postoji token u sessionStorage
+    const token = sessionStorage.getItem('token');
+    const url = token 
+     // ? 'http://localhost:8080/posts/followedPosts' // Ako postoji token
+     ? 'http://localhost:8080/posts/allPosts'
+      : 'http://localhost:8080/posts/allPosts'; // Ako token ne postoji
 
-        if (response.status === 200) {
-          this.posts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-        this.errorMessage = 'Error fetching posts data.';
-      }
-    },
+    // Priprema zaglavlja, dodaje token ako postoji
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Slanje GET zahteva na odgovarajući endpoint
+    const response = await axios.get(url, { headers });
+
+    if (response.status === 200) {
+      this.posts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    this.errorMessage = 'Error fetching posts data.';
+  }
+},
+
+
+  toggleUsersVisibility() {
+    this.showUsers = !this.showUsers; // Toggle za vidljivost korisnika
+  },
     async fetchMessage() {
       try {
         const response = await axios.get('http://localhost:8080/');
@@ -213,41 +190,41 @@ export default {
       sessionStorage.removeItem('token');
       window.location.href = 'http://localhost:8081';
     },
-     async likePost() {
-      // const token = sessionStorage.getItem('token');
+    async likePost(postId) {
+      const token = sessionStorage.getItem('token');
 
-       //if (!token) {
-         this.modalMessage = 'You must register or log in.';
-         this.showModal = true;
-         //return;
-       //}
-      },
-    //   try {
-    //     const response = await axios.put(`http://localhost:8080/posts/${postId}/like`, {}, {
-    //       headers: { 'Authorization': `Bearer ${token}` }
-    //     });
+      if (!token) {
+        this.modalMessage = 'You must register or log in.';
+        this.showModal = true;
+        return;
+      }
 
-    //     if (response.status === 200) {
-    //       alert(response.data);
-    //     } else {
-    //       alert('Error liking post.');
-    //     }
-    //   } catch (error) {
-    //     console.error('Error liking post:', error);
-    //     alert(error.response ? error.response.data : 'An error occurred while liking the post.');
-    //   }
-    // },
-     async commentPost() {
-       //const token = sessionStorage.getItem('token');
+      try {
+        const response = await axios.put(`http://localhost:8080/posts/${postId}/like`, {}, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 200) {
+          alert(response.data);
+        } else {
+          alert('Error liking post.');
+        }
+      } catch (error) {
+        console.error('Error liking post:', error);
+        alert(error.response ? error.response.data : 'An error occurred while liking the post.');
+      }
+    },
+    async commentPost(postId) {
+      const token = sessionStorage.getItem('token');
       
-      // if (!token) {
-         this.modalMessage = 'You must register or log in.';
-         this.showModal = true;
-         //return;
-      // }
-     },
-    //   alert(`Commenting on post with ID: ${postId}`);
-    // },
+      if (!token) {
+        this.modalMessage = 'You must register or log in.';
+        this.showModal = true;
+        return;
+      }
+      
+      alert(`Commenting on post with ID: ${postId}`);
+    },
     closeModal() {
       this.showModal = false;
     },
@@ -264,7 +241,51 @@ export default {
         second: '2-digit' 
       };
       return new Date(date).toLocaleString('en-US', options);
-    }
+    },
+
+    async addComment(postId) {
+      const token = sessionStorage.getItem("token");
+      const content = this.newCommentContent[postId];
+
+      if (!content) {
+        this.errorMessages[postId] = "Comment cannot be empty.";
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8080/comments/create`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({ postId, content }),
+        });
+
+        if (response.ok) {
+          const newComment = await response.json();
+          const post = this.posts.find((p) => p.id === postId);
+          if (post) {
+            post.comments.push({
+              id: newComment.id,
+              content: newComment.content,
+              username: newComment.username,
+              createdAt: newComment.createdAt,
+            });
+          }
+          this.newCommentContent[postId] = "";
+          this.errorMessages[postId] = null;
+          console.log("Comment added successfully.");
+        } else if (response.status === 429) {
+          const errorData = await response.json();
+          this.errorMessages[postId] = errorData.error || "You have reached the comment limit.";
+        }else {
+          this.errorMessages[postId] = "Failed to add comment. Please try again.";
+        }
+      } catch (error) {
+        this.errorMessages[postId] = "Error adding comment. Please try again later.";
+      }
+    },
   }
 };
 </script>
@@ -273,65 +294,149 @@ export default {
 html, body, #app {
   height: 100%;
   margin: 0;
-  background-color: #fff4e6; /* Svetlo narandžasta pozadina */
+background-color: #e0f0ff; /* svetloplava */
   font-family: 'Roboto', sans-serif;
 }
+.clickable-username {
+  color: #fff; /* Bela boja linka */
+  text-decoration: none; /* Uklanja podvlačenje */
+  transition: color 0.3s ease; /* Glatki prelaz za hover efekat */
+  font-size: 18px;
+}
+
+.clickable-username:hover {
+  color: #e5fee4; /* Svetlija bela pri prelasku miša */
+}
+.users-block {
+  position: fixed; /* Postavlja element sa desne strane */
+  top: 20px; /* Malo udaljavanje od vrha */
+  right: 20px; /* Udaljavanje od desnog ruba ekrana */
+  background-color: #e4f5fe;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Blaga senka oko prozora */
+  border: 6px solid #201a8f; /* Dodaje zeleni obrub */
+  border-radius: 8px; /* Zaobljeni uglovi */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Blaga senka oko prozora */
+  width: 350px; /* Fiksna širina */
+  max-height: 80vh; /* Ograničava visinu */
+  overflow-y: auto; /* Dodaje skrol ako lista bude prevelika */
+}
+
+.users-block h3 {
+  font-size: 30px; /* Veći font za naslov */
+  margin-bottom: 10px;
+}
+
+.users-block ul {
+  list-style-type: none; /* Uklanja tačkice */
+  padding: 0; /* Uklanja padding */
+}
+
+.users-block li {
+  font-size: 20px; /* Veći font za naslov */
+  margin-bottom: 8px; /* Prostor između svakog korisnika */
+}
+
+
+
+.users-block button {
+  background-color: #062569; /* Zelena boja dugmeta */
+  color: #fff; /* Bela boja teksta */
+  border: none; /* Uklanja okvir dugmeta */
+  padding: 10px 15px; /* Dodaje unutrašnji razmak */
+  border-radius: 8px; /* Zaobljeni uglovi */
+  font-size: 16px; /* Veličina fonta */
+  cursor: pointer; /* Pokazivač miša se menja na hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Blaga senka */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Glatki prelazi za hover */
+}
+
+.users-block button:hover {
+  background-color: #04293c; /* Tamnija zelena boja pri prelasku miša */
+  transform: scale(1.05); /* Blago povećanje dugmeta */
+}
+
+
+.clickable-username {
+  text-decoration: none; /* Uklanja podvlačenje */
+  color: #3870ac; /* Plava boja za link */
+}
+
+
+.clickable-username:hover {
+  color: #0c335d;
+}
+
+button {
+  background-color: #134a84;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
 
 #app {
   text-align: center;
-  color: #444;
+  color: #333;
   padding-top: 50px;
 }
-
-/* Modal stilovi */
+/* Modal styles */
+/* Zatamnjenje pozadine */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7); /* Zatamnjenje pozadine */
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center; /* Centriranje modala horizontalno */
+  align-items: center; /* Centriranje modala vertikalno */
+  z-index: 1000; /* Da bude iznad ostatka stranice */
 }
 
+/* Stil za modal */
 .modal {
-  background-color: #ffffff;
+  background-color: #bdddfe; /* Nova boja pozadine (svetlo crvena) */
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+  width: 300px; /* Fiksna širina modala */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Senka oko modala */
+  z-index: 1001; /* Modal treba biti iznad zatamnjenje */
+  border: 5px solid #072553; /* Dodavanje crnog border-a debljine 2px */
 }
 
-/* Dugmad */
+
 button {
-  background-color: #ffb347; /* Svetlo narandžasta */
+  background-color: #311b69;
   color: white;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
   border-radius: 5px;
-  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #ff9a3b; /* Tamnija narandžasta na hover */
+  background-color: #1c0c4a;
 }
-
-/* Stil za naslove i komentare */
 .comments-title {
   font-size: 18px;
-  color: #d35400; /* Tamnija narandžasta */
+  color: #333;
   margin-top: 15px;
   margin-bottom: 10px;
-  margin-left: 20px;
+  margin-left: 20px; /* Shift the title to the right */
 }
 
-/* Specifično dugme stilovi */
-.my-button.login,
-.my-button.register,
-.my-button.logout {
-  background-color: #ffb347; /* Svetlo narandžasta za sva dugmad */
+
+.my-button.login, .my-button.register, .my-button.logout {
+  background-color: #0056b3;
   color: white;
   border: none;
   padding: 15px 30px;
@@ -342,17 +447,17 @@ button:hover {
 }
 
 .my-button.register {
-  background-color: #ffd1a9; /* Svetlija narandžasta za dodatni kontrast */
-  color: #333;
+  background-color: #d0e8ff;
+  color: rgb(21, 28, 19);
 }
 
 .my-button:hover {
-  background-color: #ff9a3b; /* Tamnija narandžasta na hover */
+  opacity: 0.9;
 }
 
 .backend-message {
   font-size: 40px;
-  color: #d35400; /* Tamnija narandžasta */
+  color: #0f6b42;
   padding: 2%;
   background-color: transparent;
   display: inline-block;
@@ -361,37 +466,30 @@ button:hover {
 }
 
 .error-message {
-  color: #e74c3c; /* Crvena za greške */
+  color: red;
   font-weight: bold;
   margin-bottom: 20px;
 }
 
-/* Kontejner za postove */
 .posts-container {
-  display: grid;
-  /* grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); */
-  grid-template-columns: repeat(2, 1fr);
+   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); /* dva šira posta u redu */
   gap: 50px;
-  padding: 20px;
-  max-width: 800px; /* Ograničena širina za kontejner */
-  margin: 0 auto; 
+  padding: 30px;
+  justify-content: center;
 }
 
 .post {
-   max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
+ width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background-color: #e6f0ff; /* svetloplava pozadina posta */
   overflow: hidden;
   text-align: left;
   transition: transform 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
-  /* justify-content: space-between; */
-  justify-content: flex-start;
-  width: 100%; /* Širina kartice u okviru kontejnera */
-  padding: 10px; 
-
+  justify-content: space-between;
 }
 
 .post:hover {
@@ -399,21 +497,10 @@ button:hover {
 }
 
 .post-image {
-  width: 100%;
+  width: 80%;
+  padding: 5ch;
   height: auto;
   border-bottom: 1px solid #ddd;
-}
-
-.post-content {
-  padding: 15px;
-  flex-grow: 1;
-}
-
-/* Stilovi za pojedine elemente unutar kartice */
-.post-content h2 {
-  font-size: 20px;
-  color: #d35400; /* Tamnija narandžasta */
-  margin-bottom: 5px;
 }
 
 .post-description {
@@ -422,56 +509,95 @@ button:hover {
 
 .post-description h3 {
   font-size: 16px;
-  color: #d35400; /* Tamnija narandžasta */
+  color: #8e8e8e;
   margin-bottom: 9px;
 }
 
 .post-description p {
   margin: 5px 0;
   font-size: 14px;
-  color: #666;
 }
 
-/* Stil za listu komentara */
 .comments-list {
   list-style-type: none;
   padding: 10px 15px;
   border-top: 1px solid #ddd;
+  overflow-y: auto;
+  max-height: 150px;
 }
 
 .comment-item {
   margin: 5px 0;
   padding: 5px;
   border-radius: 3px;
-  background-color: #ffecd9; /* Svetlija narandžasta za komentare */
+  background-color: #f9f9f9;
 }
 
 .comment-time {
   font-size: 12px;
-  color: #bdc3c7; /* Neutralna siva */
+  color: #8e8e8e;
   margin-top: 2px;
 }
 
 .post-actions {
+  padding: 10px 15px;
   display: flex;
-  gap: 10px;
+  gap: 20px;
   justify-content: center;
-  margin-top: 20px;
+  border-top: 1px solid #ddd;
+  margin-top: auto;
 }
 
-.like-icon,
-.comment-icon {
+
+.like-icon, .comment-icon {
   font-size: 20px;
   cursor: pointer;
   transition: color 0.3s ease;
 }
 
-.like-icon:hover,
-.comment-icon:hover {
-  color: #d35400; /* Tamnija narandžasta na hover */
+.like-icon:hover, .comment-icon:hover {
+  color: #0f6b42;
 }
 
-/* Media Queries */
+.error-message-com {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 12px;
+}
+
+.add-comment {
+  margin-top: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.add-comment textarea {
+  flex: 1;
+  max-width: 80%;
+  height: 40px;
+  margin-bottom: 5px;
+  border: 1px solid #ddd;
+}
+
+.add-comment button {
+  padding: 5px 10px;
+  background-color: #0c1e5e;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-comment button:hover {
+  background-color: #4b3ca7;
+}
+
+
+
 @media (max-width: 600px) {
   .backend-message {
     font-size: 30px;
@@ -480,50 +606,4 @@ button:hover {
     font-size: 13px;
   }
 }
-
-
-
-
-
-
-
-
-
-
-.post-actions {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-top: 1px solid #ddd;
-  margin-top: auto;
-}
-
-
-.action-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-.like-button {
-  background-color: #ffb347; /* Svetlo narandžasta za Like */
-  color: white;
-}
-
-.like-button:hover {
-  background-color: #ff9a3b; /* Tamnija narandžasta na hover */
-}
-
-.comment-button {
-  background-color: #ffd1a9; /* Svetlija narandžasta za Comment */
-  color: #333;
-}
-
-.comment-button:hover {
-  background-color: #ffb347; /* Svetlo narandžasta na hover */
-}
-
-
 </style>

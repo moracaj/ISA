@@ -191,6 +191,10 @@ export default {
       },
       async createPost() {
         const token = sessionStorage.getItem('token');
+        if (!this.selectedFile) {
+  alert("Please select an image.");
+  return;
+}
         const formData = new FormData();
         formData.append("imageFile", this.selectedFile);
         formData.append("description", this.newPost.description);

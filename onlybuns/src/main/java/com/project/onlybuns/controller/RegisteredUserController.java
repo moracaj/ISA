@@ -83,64 +83,6 @@ public class RegisteredUserController {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-    /*@DeleteMapping("/{followerUsername}/unfollow/{followedUsername}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> unfollowUserByUsername(
-            @PathVariable String followerUsername,
-            @PathVariable String followedUsername) {
-
-        // Dobavljanje trenutnog korisnika iz SecurityContext-a
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInUsername = authentication.getName();
-
-        // Provera autentifikacije
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
-        }
-
-        // Provera da li ulogovani korisnik pokušava da otprati u svoje ime
-        if (!followerUsername.equals(loggedInUsername)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot unfollow as another user.");
-        }
-
-        if (followerUsername.equals(followedUsername)) {
-            return ResponseEntity.badRequest().body("You cannot unfollow yourself.");
-        }
-
-        // Dobavljanje ID-a ulogovanog korisnika i korisnika za otpraćivanje
-        Long followerId = registeredUserService.findUserIdByUsername(followerUsername);
-        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
-
-        if (followedId == null) {
-            return ResponseEntity.badRequest().body("User to unfollow not found.");
-        }
-
-        // Provera da li korisnik prati drugog korisnika
-        if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Not following this user.");
-        }
-
-        // Otpraćivanje korisnika
-        registeredUserService.unfollowUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully unfollowed the user.");
-    }*/
-
-
-
-
-
-
     @GetMapping("/allRegisteredUsers")
     public ResponseEntity<Page<RegisteredUserDto>> getRegisteredUsers1(
             @RequestParam(defaultValue = "0") int page,

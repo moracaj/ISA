@@ -23,10 +23,7 @@ public class RegisteredUserService {
         this.registeredUserRepository = registeredUserRepository;
 
     }
-    public Page<RegisteredUser> searchUsers(String firstName, String lastName, String email, Pageable pageable) {
-        return registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(
-                firstName, lastName, email, pageable);
-    }
+
 
     public Page<RegisteredUser> findAll(Pageable pageable) {
         return registeredUserRepository.findAll(pageable);

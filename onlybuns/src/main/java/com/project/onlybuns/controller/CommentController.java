@@ -51,11 +51,6 @@ public class CommentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-   /* @PostMapping
-    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
-        Comment createdComment = commentService.save(comment);
-        return ResponseEntity.ok(createdComment);
-    } */
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('REGISTERED')")
@@ -109,13 +104,13 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/stats")
-    public Map<String, Long> getCommentStats() {
-        Map<String, Long> stats = new HashMap<>();
-        stats.put("weekly", commentService.countCommentsForWeek());
-        stats.put("monthly", commentService.countCommentsForMonth());
-        stats.put("yearly", commentService.countCommentsForYear());
-        return stats;
-    }
+//    @GetMapping("/stats")
+//    public Map<String, Long> getCommentStats() {
+//        Map<String, Long> stats = new HashMap<>();
+//        stats.put("weekly", commentService.countCommentsForWeek());
+//        stats.put("monthly", commentService.countCommentsForMonth());
+//        stats.put("yearly", commentService.countCommentsForYear());
+//        return stats;
+//    }
 
 }

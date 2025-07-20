@@ -36,15 +36,7 @@ public class MyDetails implements UserDetails {
         return username; // Vraća korisničko ime
     }
 
-   /* @Override
-    public boolean isAccountNonExpired() {
-        return true; // Ovo se može promeniti na osnovu vaših poslovnih pravila
-    }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true; // Ovo se može promeniti na osnovu vaših poslovnih pravila
-    }*/
 
     @Override
     public boolean isCredentialsNonExpired() {

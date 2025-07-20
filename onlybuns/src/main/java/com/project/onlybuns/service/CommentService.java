@@ -41,24 +41,10 @@ public class CommentService {
         return commentRepository.findCommentsByDateRange(startOfWeek, now).size();
     }
 
-    public long countCommentsForMonth() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfMonth = now.minus(1, ChronoUnit.MONTHS);
-        return commentRepository.findCommentsByDateRange(startOfMonth, now).size();
-    }
-
-    public long countCommentsForYear() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startOfYear = now.minus(1, ChronoUnit.YEARS);
-        return commentRepository.findCommentsByDateRange(startOfYear, now).size();
-    }
 
     public long countCommentsByUserInLastHour(Long userId) {
         LocalDateTime oneHourAgo = LocalDateTime.now().minus(1, ChronoUnit.HOURS);
         return commentRepository.countByUserIdAndCreatedAtAfter(userId, oneHourAgo);
     }
 
-    public List<Comment> findCommentsByPostSorted(Long postId) {
-        return commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
-    }
 }

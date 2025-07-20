@@ -2,7 +2,7 @@ package com.project.onlybuns.service;
 
 import com.project.onlybuns.dto.UserDto;
 import com.project.onlybuns.config.JwtAuthenticationFilter;
-//import com.project.onlybuns.model.BloomFilter;
+
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.repository.UserRepository;
@@ -28,7 +28,7 @@ public class UserService {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final EmailService emailService;
-    //private final BloomFilter bloomFilter;
+
 
     @Autowired
     public UserService(UserRepository userRepository, RegisteredUserRepository registeredUserRepository, JwtAuthenticationFilter jwtAuthenticationFilter, EmailService emailService) {
@@ -115,29 +115,6 @@ public class UserService {
     }
 
 
-
-    /*public List<RegisteredUser> searchRegisteredUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
-        List<RegisteredUser> users = registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
-
-        // Filtriranje korisnika na osnovu broja objava
-        if (minPosts != null || maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> (minPosts == null || user.getPostsCount() >= minPosts) &&
-                            (maxPosts == null || user.getPostsCount() <= maxPosts))
-                    .toList();
-        }
-
-        // Sortiranje
-        if (sortByFollowers != null) {
-            users = sortByFollowersAndEmail(users, sortByFollowers);
-        }
-
-        return users;
-    }*/
-
-
-
-
     public void save(User user) {
         userRepository.save(user); // Čuvanje korisnika u bazi
     }
@@ -147,9 +124,7 @@ public class UserService {
     }
 
 
-    /*public RegisteredUser findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }*/
+
 
     public boolean verifyOldPassword(String username, String oldPassword) {
         RegisteredUser user = registeredUserRepository.findByUsername2(username);
@@ -175,29 +150,7 @@ public class UserService {
         user.setEmail(email);
         userRepository.save(user);
     }
-//    public void updateFirstName(String username, String newFirstName) {
-//        // Find the user by username
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-//
-//        // Update the first name
-//        user.setFirstName(newFirstName);
-//
-//        // Save the updated user
-//        userRepository.save(user);
-//    }
 
-//    public void updateLastName(String username, String newFirstName) {
-//        // Find the user by username
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-//
-//        // Update the first name
-//        user.setLastName(newFirstName);
-//
-//        // Save the updated user
-//        userRepository.save(user);
-//    }
 
     public void updateAdress(String username, String adress) {
         // Find the user by username

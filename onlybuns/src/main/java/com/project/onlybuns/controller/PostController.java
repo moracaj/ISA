@@ -1,28 +1,26 @@
 package com.project.onlybuns.controller;
 
-import com.project.onlybuns.config.JwtAuthenticationFilter;
-
 import com.project.onlybuns.dto.PostDto;
 
 import com.project.onlybuns.model.*;
 import com.project.onlybuns.repository.PostRepository;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import com.project.onlybuns.service.*;
-import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.UrlResource;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,10 +32,18 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 
 @RestController
 @RequestMapping("/posts") // Base path for post-related endpoints
 public class PostController {
+
+
+    @JsonIgnore
+    private MultipartFile imageFile;
+
 
     private final PostService postService;
     private final CommentService commentService;
@@ -68,34 +74,6 @@ public class PostController {
             return authentication.getName(); // Dobijamo korisničko ime iz JWT tokena
         }
         return null;
-    }
-
-    @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('REGISTERED')")  // Ova anotacija osigurava da samo REGISTERED korisnici mogu obrisati objavu
-    public ResponseEntity<String> deletePost(@PathVariable Long id) {
-        // Dobijanje korisničkog imena iz tokena
-        String username = getUsernameFromToken();
-
-        if (username == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated"); // 401 if user is not authenticated
-        }
-
-        // Pronađi post po ID-u
-        Optional<Post> optionalPost = postService.findById(id);
-
-        if (optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-
-            // Proveri da li je korisnik autor objave
-            if (post.getUser().getUsername().equals(username)) {
-                postService.delete(id); // Obriši post
-                return ResponseEntity.noContent().build(); // 204 if post was deleted successfully
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot delete it"); // 403 if user is not the author
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found"); // 404 if post doesn't exist
-        }
     }
 
 
@@ -164,11 +142,18 @@ public class PostController {
     @PostMapping("/create")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<Post> createPost(
+    //public ResponseEntity<PostDto> createPost(
             @RequestParam("description") String description,
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude,
             @RequestParam("location") String location,
             @RequestPart("imageFile") MultipartFile imageFile) {
+        System.out.println("📥 Stigao zahtev za /posts/create");
+        System.out.println("Opis: " + description);
+        System.out.println("Lat: " + latitude + ", Lon: " + longitude);
+        System.out.println("Fajl: " + (imageFile != null ? imageFile.getOriginalFilename() : "null"));
+        System.out.println("Lokacija: " + location);
+      //  System.out.println("Korisnik: " + username);
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null);
@@ -195,53 +180,17 @@ public class PostController {
 
         Post savedPost = postService.save(post);
 
+//        PostDto dto = new PostDto();
+//        dto.setDescription(savedPost.getDescription());
+//        dto.setImageUrl(savedPost.getImageUrl());
+//        dto.setLatitude(savedPost.getLatitude());
+//        dto.setLongitude(savedPost.getLongitude());
+//        dto.setLocation(savedPost.getLocation());
+
+       // return ResponseEntity.status(HttpStatus.CREATED).body(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
     }
 
-    @PutMapping("/update/{id}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null);
-
-        if (loggedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
-
-        Optional<Post> optionalPost = postService.findById(id);
-
-        if (optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-
-            if (!post.getUser().equals(loggedUser)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot update it");
-            }
-
-            if (updatedPost.getImageUrl() != null) {
-                post.setImageUrl(updatedPost.getImageUrl());
-            }
-            if (updatedPost.getDescription() != null) {
-                post.setDescription(updatedPost.getDescription());
-            }
-
-            postService.update(post);
-
-            return ResponseEntity.ok("Post updated successfully");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
-        }
-    }
-
-
-
-//    @GetMapping("/stats")
-//    public Map<String, Long> getPostStats() {
-//        Map<String, Long> stats = new HashMap<>();
-//        stats.put("weekly", postService.countPostsForWeek());
-//        stats.put("monthly", postService.countPostsForMonth());
-//        stats.put("yearly", postService.countPostsForYear());
-//        return stats;
-//    }
 
 
     @GetMapping("/allPosts")

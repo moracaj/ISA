@@ -6,32 +6,27 @@ import com.project.onlybuns.service.LogInService;
 import com.project.onlybuns.service.RegisteredUserService;
 import io.jsonwebtoken.*;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
 import com.project.onlybuns.dto.UserDto;
 import com.project.onlybuns.model.AdminUser;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.UserService;
-import io.jsonwebtoken.security.Keys;
+
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.crypto.SecretKey;
+
 import java.util.*;
 
 @RestController
@@ -213,15 +208,7 @@ public class AuthController {
             int postsCount = user.getPosts() != null ? user.getPosts().size() : 0;
             user.setPostsCount(postsCount);
 
-            // int likesCount = user.getLikes() != null ? user.getLikes().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
-            //user.setLikesCount(likesCount);
 
-            //int followersCount = user.getFollowers() != null ? user.getFollowers().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
-            //user.setFollowersCount(followersCount);
-
-            //int followingCount = user.getFollowing() != null ? user.getFollowing().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
-            // user.setFollowingCount(followingCount);
-//
             registeredUserService.save(user); // Sačuvaj korisnika sa ažuriranim postsCount
         }
         return ResponseEntity.ok("Old passwords updated successfully!");
@@ -240,7 +227,6 @@ public class AuthController {
             }
         }
     }
-
 
 
     @PostMapping("/logout")

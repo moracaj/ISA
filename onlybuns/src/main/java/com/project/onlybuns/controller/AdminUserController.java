@@ -8,8 +8,45 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//@RestController
+//@RequestMapping("/admin-users") // Base path for admin user related endpoints
+//public class AdminUserController {
+//
+//    private final AdminUserService adminUserService;
+//
+//    @Autowired
+//    public AdminUserController(AdminUserService adminUserService) {
+//        this.adminUserService = adminUserService;
+//    }
+//
+//    @PostMapping
+//    public ResponseEntity<AdminUser> createAdminUser(@RequestBody AdminUser adminUser) {
+//        AdminUser createdAdminUser = adminUserService.save(adminUser);
+//        return ResponseEntity.ok(createdAdminUser);
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteAdminUser(@PathVariable Long id) {
+//        adminUserService.delete(id);
+//        return ResponseEntity.noContent().build();
+//    }
+//    @GetMapping
+//    public ResponseEntity<List<AdminUser>> getAllAdminUsers() {
+//        List<AdminUser> adminUsers = adminUserService.findAll();
+//        return ResponseEntity.ok(adminUsers);
+//    }
+//
+//    @GetMapping("/{id}")
+//    public ResponseEntity<AdminUser> getAdminUserById(@PathVariable Long id) {
+//        return adminUserService.findById(id)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+//
+//
+//}
 @RestController
-@RequestMapping("/admin-users") // Base path for admin user related endpoints
+@RequestMapping("/admin-users")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
@@ -21,21 +58,23 @@ public class AdminUserController {
 
     @GetMapping
     public ResponseEntity<List<AdminUser>> getAllAdminUsers() {
-        List<AdminUser> adminUsers = adminUserService.findAll();
-        return ResponseEntity.ok(adminUsers);
+        var result = adminUserService.findAll();
+        return ResponseEntity.status(200).body(result);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AdminUser> getAdminUserById(@PathVariable Long id) {
-        return adminUserService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        var found = adminUserService.findById(id);
+        if (found.isPresent()) {
+            return ResponseEntity.ok(found.get());
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
     public ResponseEntity<AdminUser> createAdminUser(@RequestBody AdminUser adminUser) {
-        AdminUser createdAdminUser = adminUserService.save(adminUser);
-        return ResponseEntity.ok(createdAdminUser);
+        var saved = adminUserService.save(adminUser);
+        return ResponseEntity.status(201).body(saved);
     }
 
     @DeleteMapping("/{id}")

@@ -92,35 +92,6 @@ export default {
         });
     },
 
-    // Fetch nearby posts
-    // fetchNearbyPosts() {
-    //   const postIcon = L.icon({
-    //     iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-    //     iconSize: [32, 32],
-    //     iconAnchor: [16, 32],
-    //     popupAnchor: [0, -32],
-    //   });
-
-    //   axios
-    //     .get("http://localhost:8080/posts/locations")
-    //     .then((response) => {
-    //        console.log("Received posts:", response.data); // dodaatoooooooooo
-    //       response.data.forEach((post) => {
-    //         // Only attempt to add markers if the map is available
-    //         if (this.map) {
-    //           L.marker([post.latitude, post.longitude], { icon: postIcon })
-    //             .addTo(this.map)
-    //             .bindPopup(`
-    //               <div style="text-align: center;">
-    //                 <b>${post.description}</b><br>
-    //                 <img src="${post.imageUrl}" alt="Image" style="width: 100px; height: 100px; object-fit: cover;">
-    //               </div>
-    //             `);
-    //         }
-    //       });
-    //     })
-    //     .catch((error) => console.error("Error fetching posts:", error));
-    // },
 
     fetchNearbyPosts(latitude, longitude) {
       console.log("Pozivam nearby sa: lat=", latitude, "lon=", longitude);
@@ -157,38 +128,10 @@ export default {
 
 
 
-
-    // Fetch care locations
-    // fetchCareLocations() {
-    //   const careLocationIcon = L.icon({
-    //     iconUrl: "https://cdn-icons-png.flaticon.com/512/616/616557.png", // Care location icon
-    //     iconSize: [32, 32],
-    //     iconAnchor: [16, 32],
-    //     popupAnchor: [0, -32],
-    //   });
-
-    //   axios
-    //     .get("http://localhost:8080/care-location")
-    //     .then((response) => {
-    //       response.data.forEach((location) => {
-    //         // Only attempt to add markers if the map is available
-    //         if (this.map) {
-    //           L.marker([location.latitude, location.longitude], { icon: careLocationIcon })
-    //             .addTo(this.map)
-    //             .bindPopup(`
-    //               <div style="text-align: center;">
-    //                 <b>${location.name}</b>
-    //               </div>
-    //             `);
-    //         }
-    //       });
-    //     })
-    //     .catch((error) => console.error("Error fetching care locations:", error));
-    // },
-
     // Refresh map data every 5 seconds
     refreshMapData() {
       if (this.map) {
+    //if (!this.map) return;
         // Clear the current markers
         this.map.eachLayer((layer) => {
           if (layer instanceof L.Marker) {
@@ -203,7 +146,7 @@ export default {
 
         this.fetchUserLocation(username);
         this.fetchNearbyPosts();
-       // this.fetchCareLocations();
+    
       }
     },
   },

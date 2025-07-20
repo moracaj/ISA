@@ -47,23 +47,6 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
     @Query("SELECT COUNT(u) FROM RegisteredUser u")
     long countAllUsers();
 
-    /*@Query("SELECT COUNT(DISTINCT u) FROM RegisteredUser u " +
-            "JOIN u.posts p " +
-            "WHERE p.createdAt BETWEEN :startDate AND :endDate")
-    long countUsersWithPostsInDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
-
-    @Query("SELECT COUNT(DISTINCT u) FROM RegisteredUser u " +
-            "JOIN u.comments c " +
-            "WHERE c.createdAt BETWEEN :startDate AND :endDate")
-    long countUsersWithCommentsInDateRange(@Param("startDate") LocalDateTime startDate,
-                                           @Param("endDate") LocalDateTime endDate);
-    @Query("SELECT COUNT(DISTINCT u) FROM RegisteredUser u " +
-            "LEFT JOIN u.posts p ON p.createdAt BETWEEN :startDate AND :endDate " +
-            "LEFT JOIN u.comments c ON c.createdAt BETWEEN :startDate AND :endDate " +
-            "WHERE p.id IS NULL " +  // Korisnici koji nemaju postove u tom periodu
-            "AND c.id IS NULL ")  // Filtrira samo registrovane korisnike
-    long countUsersWithNoActivityAndDateRange(@Param("startDate") LocalDateTime startDate,
-                                              @Param("endDate") LocalDateTime endDate);*/
 
     @Query("SELECT COUNT(DISTINCT u) FROM RegisteredUser u " +
             "JOIN u.posts p " +

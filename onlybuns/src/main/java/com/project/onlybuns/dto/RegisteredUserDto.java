@@ -34,13 +34,7 @@ public class RegisteredUserDto {
 
     }
 
-   /* public RegisteredUserDTO(String firstName, String lastName, String email, int postsCount) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.postsCount = postsCount;
 
-    }*/
 
 
     public String getFirstName() {

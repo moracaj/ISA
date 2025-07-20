@@ -7,23 +7,14 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import org.springframework.cglib.core.Local;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Formatter;
 
 @Entity
 @Table(name = "posts")
 public class Post {
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,12 +35,17 @@ public class Post {
     private RegisteredUser user;
 
 
+
+
+
+
+
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "post-comments") // Za serijalizaciju Comments
     private List<Comment> comments = new ArrayList<>();
 
-  //  @Column(nullable = false)
-   // private boolean isDeleted = false;
+
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -143,13 +139,6 @@ public class Post {
     }
 
 
-  // public boolean isDeleted() {
-    //    return isDeleted;
-  //  }
-
-  //  public void setDeleted(boolean deleted) {
-    //    isDeleted = deleted;
-  //  }
 
     public List<Comment> getComments() {
         return comments;

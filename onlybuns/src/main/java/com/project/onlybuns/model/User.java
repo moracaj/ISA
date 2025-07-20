@@ -39,39 +39,30 @@ public abstract class User {
     private String lastName;
 
     private String address;
-    private Float latitude;
-    private Float longitude;
+    private Double latitude;
+    private Double longitude;
 
     private boolean isActive; // Da li je nalog aktiviran
 
     @Column(name = "posts_count")
     private Integer postsCount; // Broj objava
 
-    public Float getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Float latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public Float getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Float longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-   // @Column(name = "followers_count")
-   // private Integer followersCount;
-
-   // @Column(name = "following_count")
-  //  private Integer followingCount;
-    //private int followersCount; // Broj pratilaca
-
-   // @Column(name = "likes_count")
-   // private Integer likesCount;
 
     @Column(name = "registration_date")
     private LocalDateTime registrationDate; // Datum kada je pokušao da se registruje
@@ -112,30 +103,10 @@ public abstract class User {
     }
 
 
-
-
-  //  public Integer getFollowingCount() {
-  //      return followingCount!=null ? followingCount:0;
-   // }
-
- //   public void setFollowersCount(Integer followersCount) {
-  //      this.followersCount = followersCount;
-  //  }
-
-   // public void setFollowingCount(Integer followersCount) {
-
-   //     this.followingCount = followersCount;
-  //  }
-
-
-
     // No-argument constructor
     public User() {
         this.isActive = false; // Podrazumevano nije aktiviran
-       // this.followersCount = 0;
-       // this.followingCount =0;
         this.postsCount =0;
-       // this.likesCount =0;
         this.registrationDate = LocalDateTime.now();
     }
 
@@ -217,15 +188,6 @@ public abstract class User {
     public void setAddress(String address) {
         this.address = address;
     }
-
-    //public Integer getLikesCount() {
-     //   return likesCount != null ? likesCount : 0; // Vraća 0 ako je null
-   // }
-
-  //  public void setLikesCount(Integer likesCount) {
-    //    this.likesCount = likesCount;
-  //  }
-
 
 
     public boolean isActive() {

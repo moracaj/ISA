@@ -50,32 +50,6 @@ public class PostService {
     }
 
 
-
-
-
-//    public long countPostsForWeek() {
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime startOfWeek = now.minus(1, ChronoUnit.WEEKS);
-//        return postRepository.findPostsByDateRange(startOfWeek, now).size();
-//    }
-//
-//
-//
-//
-//    public long countPostsForMonth() {
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime startOfMonth = now.minus(1, ChronoUnit.MONTHS);
-//        return postRepository.findPostsByDateRange(startOfMonth, now).size();
-//    }
-//
-//    public long countPostsForYear() {
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime startOfYear = now.minus(1, ChronoUnit.YEARS);
-//        return postRepository.findPostsByDateRange(startOfYear, now).size();
-//    }
-
-
-
     @Transactional
     public Post update(Post updatedPost) {
         // Proveri da li post sa datim ID-om postoji
@@ -132,18 +106,6 @@ public class PostService {
     }
 
 
-
-//    public List<PostDto> getPostsLocations() {
-//        List<Post> posts = postRepository.findAll();
-//        return posts.stream()
-//                .filter(post -> post.getLatitude() != null && post.getLongitude() != null)
-//                .map(post -> new PostDto(
-//                        post.getImageUrl(),
-//                        post.getLatitude(),
-//                        post.getLongitude(),
-//                        post.getDescription()))
-//                .toList();
-//    }
 public List<PostDto> getPostsLocations() {
     List<Post> posts = postRepository.findAllWithCoordinates();
     return posts.stream()
