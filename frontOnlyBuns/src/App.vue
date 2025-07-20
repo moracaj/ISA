@@ -1,30 +1,3 @@
-<!-- <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
-</template>
-
-<script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style> -->
-
 
 
 
@@ -45,38 +18,6 @@ export default {
         <button @click="logout" class="my-button logout">Log out</button>
       </div>
 
-       <!-- <div v-if="errorMessage" class="error-message">
-        <p>{{ errorMessage }}</p>
-      </div>  -->
-
-      <!-- <div class="posts-container">
-        <div v-for="post in posts" :key="post.id" class="post">
-          <img :src="post.imageUrl" alt="Post Image" class="post-image" />
-
-          <div class="post-description">
-            <h3>Description:</h3>
-            <p>{{ post.description }}</p>
-            <h3>Likes:</h3>
-            <p>{{ post.countLikes }}</p>
-            <p>Posted by: {{ post.username }}</p>
-            <p>Created at: {{ formatDate(post.createdAt) }}</p>
-          </div>
-
-          <h3 class="comments-title">Comments:</h3>
-
-          <ul class="comments-list">
-            <li v-for="comment in sortedComments(post.comments)" :key="comment.id" class="comment-item">
-              <strong>{{ comment.username }}:</strong> {{ comment.content }}
-              <p class="comment-time">Commented at: {{ formatDate(comment.createdAt) }}</p>
-            </li>
-          </ul>
-
-           <div class="post-actions">
-            <i class="fas fa-thumbs-up like-icon" @click="likePost(post.id)"></i>
-            <i class="fas fa-comment-alt comment-icon" @click="commentPost(post.id)"></i>
-          </div> 
-        </div>
-      </div> -->
 
       <div class="posts-container">
   <div v-for="post in posts" :key="post.id" class="post">
@@ -222,21 +163,7 @@ export default {
          //return;
        //}
       },
-    //   try {
-    //     const response = await axios.put(`http://localhost:8080/posts/${postId}/like`, {}, {
-    //       headers: { 'Authorization': `Bearer ${token}` }
-    //     });
-
-    //     if (response.status === 200) {
-    //       alert(response.data);
-    //     } else {
-    //       alert('Error liking post.');
-    //     }
-    //   } catch (error) {
-    //     console.error('Error liking post:', error);
-    //     alert(error.response ? error.response.data : 'An error occurred while liking the post.');
-    //   }
-    // },
+  
      async commentPost() {
        //const token = sessionStorage.getItem('token');
       
@@ -283,131 +210,7 @@ html, body, #app {
   padding-top: 50px;
 }
 
-/* Modal stilovi */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-.modal {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-/* Dugmad */
-button {
-  background-color: #ffb347; /* Svetlo narandžasta */
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #ff9a3b; /* Tamnija narandžasta na hover */
-}
-
-/* Stil za naslove i komentare */
-.comments-title {
-  font-size: 18px;
-  color: #d35400; /* Tamnija narandžasta */
-  margin-top: 15px;
-  margin-bottom: 10px;
-  margin-left: 20px;
-}
-
-/* Specifično dugme stilovi */
-.my-button.login,
-.my-button.register,
-.my-button.logout {
-  background-color: #ffb347; /* Svetlo narandžasta za sva dugmad */
-  color: white;
-  border: none;
-  padding: 15px 30px;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.my-button.register {
-  background-color: #ffd1a9; /* Svetlija narandžasta za dodatni kontrast */
-  color: #333;
-}
-
-.my-button:hover {
-  background-color: #ff9a3b; /* Tamnija narandžasta na hover */
-}
-
-.backend-message {
-  font-size: 40px;
-  color: #d35400; /* Tamnija narandžasta */
-  padding: 2%;
-  background-color: transparent;
-  display: inline-block;
-  margin: 20px;
-  max-width: 90%;
-}
-
-.error-message {
-  color: #e74c3c; /* Crvena za greške */
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-/* Kontejner za postove */
-.posts-container {
-  display: grid;
-  /* grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); */
-  grid-template-columns: repeat(2, 1fr);
-  gap: 50px;
-  padding: 20px;
-  max-width: 800px; /* Ograničena širina za kontejner */
-  margin: 0 auto; 
-}
-
-.post {
-   max-width: 100%;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
-  overflow: hidden;
-  text-align: left;
-  transition: transform 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  /* justify-content: space-between; */
-  justify-content: flex-start;
-  width: 100%; /* Širina kartice u okviru kontejnera */
-  padding: 10px; 
-
-}
-
-.post:hover {
-  transform: translateY(-10px);
-}
-
-.post-image {
-  width: 100%;
-  height: auto;
-  border-bottom: 1px solid #ddd;
-}
-
-.post-content {
-  padding: 15px;
-  flex-grow: 1;
-}
 
 /* Stilovi za pojedine elemente unutar kartice */
 .post-content h2 {

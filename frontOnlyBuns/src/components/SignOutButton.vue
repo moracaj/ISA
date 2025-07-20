@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <div class="button-container">
       <button @click="signOut" class="my-button sign-out">Log out</button>
     </div>
@@ -50,4 +50,4 @@
 }
 
   </style>
-  
+   -->

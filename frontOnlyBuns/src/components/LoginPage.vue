@@ -1,199 +1,172 @@
- <template>
-  <div class="form">
-    <h2>{{ isRegister ? 'Registration' : 'Log in' }}</h2>
+<template>
+  <div class="auth-box">
+    <h2>{{ showRegisterForm ? 'Create Account' : 'Sign In' }}</h2>
     <HomeButton />
 
-    <template v-if="isRegister">
-      <input type="text" v-model="username" placeholder="Enter your username" />
-      <input type="email" v-model="registerEmail" placeholder="Enter your email" />
-      <input type="password" v-model="registerPassword" placeholder="Enter your password" />
-      <input type="password" v-model="confirmPassword" placeholder="Confirm your password" />
-      <input type="text" v-model="firstName" placeholder="Enter your first name" />
-      <input type="text" v-model="lastName" placeholder="Enter your last name" />
-      <input type="text" v-model="address" placeholder="Enter your address" />
-      <button @click="register" class="my-button2">Register</button>
+    <template v-if="showRegisterForm">
+      <input v-model="newUsername" placeholder="Username" type="text" />
+      <input v-model="newUserEmail" placeholder="Email" type="email" />
+      <input v-model="newPassword" placeholder="Password" type="password" />
+      <input v-model="repeatPassword" placeholder="Repeat Password" type="password" />
+      <input v-model="first" placeholder="First Name" type="text" />
+      <input v-model="last" placeholder="Last Name" type="text" />
+      <input v-model="location" placeholder="Address" type="text" />
+      <button class="action-btn" @click="submitRegistration">Sign Up</button>
     </template>
 
     <template v-else>
-      <input type="email" v-model="email" placeholder="Enter your email" />
-      <input type="password" v-model="password" placeholder="Enter your password" />
-      <button @click="login" class="my-button2">Log in</button>
+      <input v-model="loginEmail" placeholder="Email" type="email" />
+      <input v-model="loginPassword" placeholder="Password" type="password" />
+      <button class="action-btn" @click="performLogin">Login</button>
     </template>
 
-    <button @click="toggleForm" class="toggle-button2">
-      {{ isRegister ? 'Already have an account? Log in' : 'Don\'t have an account? Register' }}
+    <button class="switch-btn" @click="switchForm">
+      {{ showRegisterForm ? 'Already registered? Login here' : 'No account? Create one' }}
     </button>
   </div>
-</template> 
-
-
+</template>
 
 <script>
 import HomeButton from './HomePageButton.vue';
 
 export default {
-  components:{
-    HomeButton,
-
-  },
+  components: { HomeButton },
   data() {
     return {
-      isRegister: false,
-      username: "",
-      registerEmail: "",
-      registerPassword: "",
-      confirmPassword: "",
-      firstName: "",
-      lastName: "",
-      address: "",
-      email: "",
-      password: ""
+      showRegisterForm: false,
+      newUsername: "",
+      newUserEmail: "",
+      newPassword: "",
+      repeatPassword: "",
+      first: "",
+      last: "",
+      location: "",
+      loginEmail: "",
+      loginPassword: ""
     };
   },
   methods: {
-    toggleForm() {
+    switchForm() {
       this.$router.push({ name: 'Register' });
-      
-    },  
-  
-    async login() {
-  try {
-    const response = await fetch("http://localhost:8080/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: this.email, password: this.password })
-    });
+    },
+    async performLogin() {
+      try {
+        const res = await fetch("http://localhost:8080/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: this.loginEmail, password: this.loginPassword })
+        });
 
-    const data = await response.json();
+        const result = await res.json();
 
-    if (response.ok) {
-      console.log("User role: ", data.userType);
+        if (res.ok) {
+          sessionStorage.setItem("token", result.token);
+          sessionStorage.setItem("userType", result.userType);
 
-      // Sačuvaj token i tip korisnika u sessionStorage
-      sessionStorage.setItem('token', data.token); // Sačuvaj token
-      sessionStorage.setItem('userType', data.userType); // Sačuvaj tip korisnika
-
-      // Ako je korisnik admin, preusmeri ga na Admin stranicu
-      if (data.userType === "ROLE_ADMIN") {
-        this.$router.push({ name: "Admin" });
-      } else if (data.userType === "ROLE_REGISTERED") {
-        this.$router.push({ name: "Registered" });
-      } else {
-        alert("Unknown user type.");
+          if (result.userType === "ROLE_ADMIN") {
+            this.$router.push({ name: "Admin" });
+          } else if (result.userType === "ROLE_REGISTERED") {
+            this.$router.push({ name: "Registered" });
+          } else {
+            alert("Unsupported user type.");
+          }
+        } else {
+          alert(result.message || "Login failed.");
+        }
+      } catch (err) {
+        alert("Login error: " + err.message);
       }
-    } else {
-      alert(data.message || "Error during login!");
-    }
-  } catch (error) {
-    alert("An error occurred: " + error.message);
-  }
-},
-    async register() {
-      if (this.registerPassword !== this.confirmPassword) {
+    },
+    async submitRegistration() {
+      if (this.newPassword !== this.repeatPassword) {
         alert("Passwords do not match.");
         return;
       }
 
       try {
-        const response = await fetch("http://localhost:8080/register", {
+        const res = await fetch("http://localhost:8080/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            username: this.username,
-            email: this.registerEmail,
-            password: this.registerPassword,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            address: this.address
+            username: this.newUsername,
+            email: this.newUserEmail,
+            password: this.newPassword,
+            firstName: this.first,
+            lastName: this.last,
+            address: this.location
           })
         });
 
-        const data = await response.json();
+        const result = await res.json();
 
-        if (response.ok) {
-          alert("Registration successful!");
+        if (res.ok) {
+          alert("Account created successfully!");
         } else {
-          alert(data.message || "Registration failed. Please try again.");
+          alert(result.message || "Registration error.");
         }
-      } catch (error) {
-        alert("An error occurred: " + error.message);
+      } catch (err) {
+        alert("Registration error: " + err.message);
       }
- 
     }
   }
 };
 </script>
 
 <style scoped>
-.form {
-  margin-top: 30px; /* Prilagođava položaj */
-  margin-left: auto; /* Centriranje horizontalno */
-  margin-right: auto; /* Centriranje horizontalno */
+.auth-box {
+  margin-top: 40px;
+  margin-left: auto;
+  margin-right: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #ffecd9; /* Svetlo narandžasta pozadina */
-  border-radius: 15px;
-  padding: 30px; /* Veći padding za više prostora oko sadržaja */
-  width: 600px; /* Širina za bolji raspored */
-  height: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  gap: 20px;
+  background-color: #fff0e5;
+  border-radius: 12px;
+  padding: 35px;
+  width: 580px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  gap: 18px;
 }
 
 h2 {
-  font-size: 34px;
-  margin-bottom: 20px;
-  color: #d35400; /* Tamnija narandžasta za naslov */
-}
-
-.input-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Dve kolone */
-  gap: 10px; /* Razmak između polja */
-  width: 100%; /* Pun široki prikaz */
+  font-size: 32px;
+  color: #bf360c;
+  margin-bottom: 15px;
 }
 
 input {
-  font-size: 19px;
-  height: 50px;
+  font-size: 18px;
+  height: 48px;
   padding: 10px;
-  border: 1px solid #f0a97e; /* Svetlija narandžasta ivica */
-  border-radius: 15px;
-  background-color: #fff9f0; /* Svetlo narandžasta pozadina unosa */
+  width: 100%;
+  border: 1px solid #ffb184;
+  border-radius: 12px;
+  background-color: #fff7ef;
 }
 
-.button-container2 {
-  display: flex; /* Centriranje dugmeta */
-  justify-content: center;
-  margin-top: 20px; /* Prostor iznad dugmeta */
-  width: 100%; /* Pun široki prikaz dugmeta */
-}
-
-.my-button2 {
-  width: 150px;
-  height: 40px;
-  background-color: #ff9a3b; /* Tamnija narandžasta za dugme */
-  color: white;
+.action-btn {
+  width: 160px;
+  height: 42px;
+  background-color: #ff8c42;
+  color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  font-size: medium;
+  transition: background-color 0.25s;
 }
 
-.my-button2:hover {
-  background-color: #d35400; /* Još tamnija narandžasta na hover */
+.action-btn:hover {
+  background-color: #c94f00;
 }
 
-.toggle-button2 {
-  margin-top: 10px;
-  background: none;
+.switch-btn {
+  margin-top: 12px;
+  background: transparent;
   border: none;
   font-size: 15px;
-  color: #d35400; /* Tamnija narandžasta za tekst dugmeta */
-  cursor: pointer;
+  color: #c94f00;
   text-decoration: underline;
+  cursor: pointer;
 }
-
 </style>

@@ -1,49 +1,44 @@
 <template>
-    <div class="home-button-container">
-      <button @click="goToHome" class="home-button">
-        <!-- Font Awesome House Icon -->
-        <i class="fas fa-home"></i>
-      </button>
-    </div>
-  </template>
-  
-  
+  <div class="fixed-home-wrapper">
+    <button @click="redirectHome" class="home-nav-btn">
+      <i class="fas fa-home"></i>
+    </button>
+  </div>
+</template>
+
 <script>
 export default {
   methods: {
-    goToHome() {
-      const token = sessionStorage.getItem('token');  // Get token from sessionStorage
-      if (token) {
-        // Redirect with token if it exists
-        window.location.href = `http://localhost:8081?token=${token}`;
+    redirectHome() {
+      const userToken = sessionStorage.getItem('token');
+      if (userToken) {
+        window.location.href = `http://localhost:8081?token=${userToken}`;
       } else {
-        // Show alert and redirect without token if it doesn't exist
-         window.location.href = "http://localhost:8081";  // Redirect to home without token
+        window.location.href = 'http://localhost:8081';
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
-  
-<style>
-.home-button-container {
-  position: fixed;    /* Fix the button in place */
-  top: 10px;          /* Distance from the top of the screen */
-  right: 10px;        /* Distance from the right edge of the screen */
-  z-index: 1000;      /* Ensure it's above other content */
+<style scoped>
+.fixed-home-wrapper {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 999;
 }
 
-.home-button {
-  background-color: #f5f5f5;  /* Button background color */
-  padding: 10px 20px;         /* Button padding */
-  border: none;               /* Remove border */
-  border-radius: 5px;         /* Rounded corners */
-  cursor: pointer;            /* Change cursor on hover */
-  font-size: 16px;             /* Text size */
+.home-nav-btn {
+  background-color: #f0f0f0;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
 }
 
-.home-button:hover {
-  background-color: #e0e0e0;  /* Darken the button on hover */
+.home-nav-btn:hover {
+  background-color: #dcdcdc;
 }
 </style>

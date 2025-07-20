@@ -1,85 +1,78 @@
 <template>
-  <div class="button-container">
-    <button @click="goToLogin" class="my-button login">Log in</button>
-    <button @click="goToRegister" class="my-button register">Sign in</button>
-  
+  <div class="access-panel">
+    <button @click="navigateToLogin" class="access-btn login-style">Log in</button>
+    <button @click="navigateToSignup" class="access-btn signup-style">Sign in</button>
   </div>
 </template>
-
 
 <script>
 export default {
   methods: {
-    goToLogin() {
-      console.log("Navigating to Login");
+    navigateToLogin() {
+      console.log("Redirecting to Login Page");
       this.$router.push({ name: 'Login' });
     },
-    goToRegister() {
-      console.log("Navigating to Register");
+    navigateToSignup() {
+      console.log("Redirecting to Registration Page");
       this.$router.push({ name: 'Register' });
     }
   }
-}
+};
 </script>
 
-  
-  <style>
-
-.button-container {
-  display: flex; 
-  position: fixed; /* Fiksiran položaj */
-  top: 30px; /* 30px od vrha */
-  right: 30px; /* 30px od desne ivice */
-  gap: 10px; /* Razmak između dugmadi */
-  flex-wrap: wrap; /* Dozvoljava dugmadima da prelome u novi red ako je potrebno */
+<style scoped>
+.access-panel {
+  position: fixed;
+  display: flex;
+  gap: 12px;
+  top: 30px;
+  right: 30px;
+  flex-wrap: wrap;
 }
 
-/* Stil za dugmad */
-.my-button {
-  padding: 15px;
-  border-radius: 5px;
+.access-btn {
+  padding: 14px;
+  border-radius: 6px;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s;
-  font-size: 1em;
+  transition: 0.3s ease;
   flex: 1;
-  min-width: 90px;
-  max-width: 50%;
+  min-width: 95px;
+  max-width: 48%;
   box-sizing: border-box;
 }
 
-/* Stil za prvo dugme (Log in) */
-.my-button.login {
-  background-color: #ff9a3b; /* Svetlija narandžasta */
-  color: white;
+/* Login button style */
+.login-style {
+  background-color: #ffa94d;
+  color: #fff;
+  border: none;
 }
 
-.my-button.login:hover {
-  background-color: #d35400; /* Tamnija narandžasta na hover */
+.login-style:hover {
+  background-color: #cc4b00;
 }
 
-/* Stil za drugo dugme (Sign in) */
-.my-button.register {
-  background-color: white; /* Bela pozadina */
-  color: #ff9a3b; /* Svetlija narandžasta za tekst */
-  border: 2px solid #ff9a3b; /* Svetlija narandžasta za ivicu */
+/* Register button style */
+.signup-style {
+  background-color: #ffffff;
+  color: #ffa94d;
+  border: 2px solid #ffa94d;
 }
 
-.my-button.register:hover {
-  background-color: #ffe0b2; /* Svetlija narandžasta na hover */
+.signup-style:hover {
+  background-color: #ffe6c1;
 }
 
-/* Stil za sliku zeca */
+/* Decorative bunny image style */
 .rabbit-gif {
-  position: fixed; /* Pozicioniranje slike u gornji levi ugao */
+  position: fixed;
   top: 20px;
   left: 20px;
   width: 150px;
-  height: auto;
-  z-index: 10;
+  background-color: #ffd1a9;
   border-radius: 15px;
   padding: 5px;
-  background-color: #ffd1a9; /* Svetlo narandžasta pozadina za sliku */
+  z-index: 10;
 }
-
-  </style>
-  
+</style>

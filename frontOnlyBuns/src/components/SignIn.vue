@@ -1,6 +1,6 @@
-<template>
+<!-- <template>
     <div class="signin-page">
-      <!-- Ova stranica je prazna -->
+      <!-- Ova stranica je prazna --
     </div>
   </template>
   
@@ -18,4 +18,4 @@
 
   
   </style>
-  
+   -->
